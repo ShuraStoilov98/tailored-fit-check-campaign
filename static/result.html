@@ -56,9 +56,24 @@
         <div id="improvements" class="result-bullets"></div>
       </section>
 
+      <section class="download-card">
+        <p class="download-eyebrow">Free iOS App</p>
+        <h2 class="download-heading">Download<br>Tailored</h2>
+        <p class="download-subcopy">Never regret a purchase again.<br>Your wardrobe. Tailored to you.</p>
+        <a
+          id="app-cta"
+          class="app-store-btn"
+          href="https://go.tailored-to-you.com/try"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Download on the App Store
+        </a>
+      </section>
+
       <section class="lead-card">
-        <h2 class="lead-heading">Join the early community</h2>
-        <p class="lead-subcopy">Get early access to daily Fit Checks, styling tips, and new Tailored features.</p>
+        <h2 id="lead-heading" class="lead-heading">Join the early community</h2>
+        <p id="lead-subcopy" class="lead-subcopy">Get early access to daily Fit Checks, styling tips, and new Tailored features.</p>
         <p id="lead-msg" class="lead-message hidden" role="alert"></p>
         <form id="lead-form" novalidate>
           <input
@@ -74,12 +89,11 @@
           </label>
           <button id="lead-submit" type="submit" class="lead-submit-btn">Join the community</button>
         </form>
-      </section>
-
-      <section class="cta-card">
-        <a id="app-cta" class="primary-btn" href="https://go.tailored-to-you.com/try" target="_blank" rel="noopener noreferrer">
-          Get daily fit checks in Tailored
-        </a>
+        <div id="lead-success" class="lead-success hidden">
+          <p class="lead-success-heading">Thanks for joining.</p>
+          <p class="lead-success-sub">You're on the early Tailored list.</p>
+          <p class="lead-success-note">We'll send you styling notes, launch updates, and early access.</p>
+        </div>
       </section>
     </main>
 

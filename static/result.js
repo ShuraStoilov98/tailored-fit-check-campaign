@@ -19,11 +19,14 @@ const colourScoreEl = document.getElementById("colour-score");
 const whatWorksBlock = document.getElementById("what-works");
 const improvementsBlock = document.getElementById("improvements");
 const appCta = document.getElementById("app-cta");
+const leadHeading = document.getElementById("lead-heading");
+const leadSubcopy = document.getElementById("lead-subcopy");
 const leadForm = document.getElementById("lead-form");
 const leadEmailInput = document.getElementById("lead-email");
 const leadConsentCheckbox = document.getElementById("lead-consent-checkbox");
 const leadSubmitBtn = document.getElementById("lead-submit");
 const leadMsg = document.getElementById("lead-msg");
+const leadSuccess = document.getElementById("lead-success");
 
 let _parsed = null;
 
@@ -210,11 +213,11 @@ leadForm.addEventListener("submit", async (e) => {
       throw new Error(data.error || "We couldn't save your email just now. Please try again.");
     }
 
-    leadEmailInput.disabled = true;
-    leadConsentCheckbox.disabled = true;
-    leadSubmitBtn.disabled = true;
-    leadSubmitBtn.textContent = "Joined";
-    showLeadMsg("You're in — welcome to the early Tailored community.", "success");
+    leadHeading.classList.add("hidden");
+    leadSubcopy.classList.add("hidden");
+    leadMsg.classList.add("hidden");
+    leadForm.classList.add("hidden");
+    leadSuccess.classList.remove("hidden");
   } catch (err) {
     const message = err instanceof Error ? err.message : "We couldn't save your email just now. Please try again.";
     showLeadMsg(message, "error");

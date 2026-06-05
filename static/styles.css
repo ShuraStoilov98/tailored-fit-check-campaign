@@ -11,9 +11,9 @@
   --score-green: #a9ae90;
   --score-yellow: #e4cf75;
   --border: rgba(31, 31, 34, 0.08);
-  --radius-lg: 32px;
-  --radius-md: 22px;
-  --radius-sm: 14px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
   --danger: #a93a3a;
 }
 
@@ -106,8 +106,7 @@ p {
 
 .capture-card,
 .result-card,
-.lead-card,
-.cta-card {
+.lead-card {
   margin-top: 1.1rem;
   background: var(--card);
   border: 1px solid var(--border);
@@ -117,8 +116,8 @@ p {
 }
 
 .result-page .result-card,
-.result-page .lead-card,
-.result-page .cta-card {
+.result-page .download-card,
+.result-page .lead-card {
   margin-top: 0.75rem;
 }
 
@@ -331,7 +330,7 @@ p {
 .hero-image {
   position: relative;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
   background: #ece8f3;
   width: 100%;
   max-width: 430px;
@@ -450,6 +449,53 @@ p {
   line-height: 1.35;
 }
 
+.download-card {
+  background: #1c1c1e;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.25rem 1.4rem;
+  overflow: hidden;
+}
+
+.download-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.download-heading {
+  font-family: "Playfair Display", serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin-top: 0.3rem;
+}
+
+.download-subcopy {
+  margin-top: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.app-store-btn {
+  display: inline-block;
+  margin-top: 1.3rem;
+  padding: 0.72rem 1.4rem;
+  background: #ffffff;
+  color: #1c1c1e;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
 .lead-heading {
   font-family: "Playfair Display", serif;
   font-size: 1.2rem;
@@ -550,6 +596,31 @@ p {
   cursor: not-allowed;
 }
 
+.lead-success {
+  padding: 0.25rem 0;
+}
+
+.lead-success-heading {
+  font-family: "Playfair Display", serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.lead-success-sub {
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.lead-success-note {
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
 .hidden {
   display: none;
 }
@@ -573,8 +644,11 @@ p {
 
   .capture-card,
   .result-card,
-  .lead-card,
-  .cta-card {
+  .lead-card {
     padding: 1.25rem;
+  }
+
+  .download-card {
+    padding: 1.75rem 1.5rem 1.6rem;
   }
 }
