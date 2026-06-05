@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tailored | Free AI Fit Check</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body class="capture-page">
+    <main class="app-shell">
+      <header class="top-brand">
+        <div class="logo-wrap" aria-label="Tailored">
+          <img
+            id="brand-logo"
+            src="/static/assets/tailored-logo.svg"
+            alt="Tailored"
+          />
+          <span id="logo-fallback" class="logo-fallback hidden">Tailored</span>
+        </div>
+        <p class="eyebrow">Tailored Daily Fit Check</p>
+      </header>
+
+      <section class="hero-copy">
+        <h1>Get your free AI Fit Check</h1>
+        <p>Snap your outfit. Get an instant verdict.</p>
+      </section>
+
+      <section class="capture-card">
+        <form id="fit-check-form" novalidate>
+          <input
+            id="photo"
+            name="image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            capture="environment"
+            class="visually-hidden"
+            required
+          />
+          <label for="photo" id="upload-card" class="upload-card" role="button" tabindex="0">
+            <img id="upload-preview" class="upload-preview" alt="Selected outfit" />
+            <div class="upload-placeholder">
+              <span class="upload-title">Take or upload a photo</span>
+              <span id="upload-subtext" class="upload-subtext">Tap to open camera or gallery</span>
+            </div>
+            <div class="upload-change-hint">Tap to change</div>
+          </label>
+
+          <div class="occasion-block">
+            <p class="field-title">Occasion</p>
+            <div id="occasion-chips" class="chip-row" role="radiogroup" aria-label="Occasion">
+              <button type="button" class="chip" data-value="Work" role="radio" aria-checked="false">Work</button>
+              <button type="button" class="chip" data-value="Conference" role="radio" aria-checked="false">Conference</button>
+              <button type="button" class="chip" data-value="Date" role="radio" aria-checked="false">Date</button>
+              <button type="button" class="chip" data-value="Dinner" role="radio" aria-checked="false">Dinner</button>
+              <button type="button" class="chip" data-value="Casual" role="radio" aria-checked="false">Casual</button>
+              <button type="button" class="chip" data-value="Other" role="radio" aria-checked="false">Other</button>
+            </div>
+            <input type="hidden" id="occasion-input" name="occasion" value="" />
+          </div>
+
+          <button id="submit-button" type="submit" class="primary-btn" disabled>Get my Fit Check</button>
+          <p id="error" class="status error hidden" role="alert"></p>
+        </form>
+      </section>
+    </main>
+
+    <section id="processing-state" class="processing-state hidden" aria-live="polite" aria-busy="true">
+      <div class="processing-card">
+        <div class="pulse-dot" aria-hidden="true"></div>
+        <h2>Checking your fit...</h2>
+        <p>Looking at style, colour, and overall polish</p>
+      </div>
+    </section>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

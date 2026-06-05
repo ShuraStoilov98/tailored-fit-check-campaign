@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tailored | Your Fit Check</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body class="result-page">
+    <main class="app-shell">
+      <header class="top-brand">
+        <div class="logo-wrap" aria-label="Tailored">
+          <img
+            id="brand-logo"
+            src="/static/assets/tailored-logo.svg"
+            alt="Tailored"
+          />
+          <span id="logo-fallback" class="logo-fallback hidden">Tailored</span>
+        </div>
+        <p class="eyebrow">Tailored Daily Fit Check</p>
+      </header>
+
+      <section class="hero-image">
+        <img id="result-image" src="" alt="Uploaded outfit" />
+        <p id="look-label" class="look-label">Clean casual look</p>
+      </section>
+
+      <section class="result-card">
+        <div class="score-row">
+          <p class="score-label">Overall score</p>
+          <p id="overall-score" class="score-value">4/5</p>
+        </div>
+        <div class="score-track" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="4">
+          <div id="overall-score-fill" class="score-fill" style="width: 80%"></div>
+        </div>
+
+        <div id="subscores" class="subscores">
+          <div class="subscore">
+            <p id="fit-score" class="subscore-value">4</p>
+            <p class="subscore-label">Fit</p>
+          </div>
+          <div class="subscore">
+            <p id="style-score" class="subscore-value">3</p>
+            <p class="subscore-label">Style</p>
+          </div>
+          <div class="subscore">
+            <p id="colour-score" class="subscore-value">4</p>
+            <p class="subscore-label">Colour</p>
+          </div>
+        </div>
+
+        <p class="result-section-title">What works</p>
+        <div id="what-works" class="result-bullets"></div>
+
+        <p class="result-section-title">What could be improved</p>
+        <div id="improvements" class="result-bullets"></div>
+      </section>
+
+      <section class="cta-card">
+        <a id="app-cta" class="primary-btn" href="https://go.tailored-to-you.com/try" target="_blank" rel="noopener noreferrer">
+          Get daily fit checks in Tailored
+        </a>
+        <button type="button" class="secondary-btn">Join the early community</button>
+      </section>
+    </main>
+
+    <script src="/static/result.js"></script>
+  </body>
+</html>

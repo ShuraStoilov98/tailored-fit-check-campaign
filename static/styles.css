@@ -1,0 +1,477 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap");
+
+:root {
+  --bg: #f6f4fa;
+  --card: #fcfaf7;
+  --text: #1f1f22;
+  --muted: #8e8b94;
+  --button: #26262b;
+  --button-text: #ffffff;
+  --accent-stone: #d8d1c6;
+  --score-green: #a9ae90;
+  --score-yellow: #e4cf75;
+  --border: rgba(31, 31, 34, 0.08);
+  --radius-lg: 32px;
+  --radius-md: 22px;
+  --radius-sm: 14px;
+  --danger: #a93a3a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 0 0, rgba(220, 213, 236, 0.5), transparent 32%),
+    radial-gradient(circle at 100% 10%, rgba(244, 236, 226, 0.8), transparent 45%),
+    var(--bg);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.app-shell {
+  width: min(100%, 460px);
+  margin: 0 auto;
+  padding: 1.1rem 1rem 2rem;
+}
+
+.top-brand {
+  display: grid;
+  justify-items: start;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+}
+
+.logo-wrap {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-wrap img {
+  display: block;
+  width: auto;
+  object-fit: contain;
+}
+
+.capture-page .logo-wrap img {
+  height: 32px;
+}
+
+.result-page .logo-wrap img {
+  height: 26px;
+}
+
+.logo-fallback {
+  font-family: "Playfair Display", serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.hero-copy {
+  margin-top: 1.25rem;
+}
+
+.hero-copy h1 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+}
+
+.hero-copy p {
+  margin-top: 0.8rem;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.capture-card,
+.result-card,
+.cta-card {
+  margin-top: 1.1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 14px 35px rgba(31, 31, 34, 0.08);
+  padding: 1rem;
+}
+
+.result-page .result-card,
+.result-page .cta-card {
+  margin-top: 0.75rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.upload-card {
+  display: block;
+  width: 100%;
+  border: 1.5px dashed rgba(31, 31, 34, 0.2);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #fffcf8 0%, #fbf7ef 100%);
+  padding: 2rem 1.1rem;
+  cursor: pointer;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-preview {
+  display: none;
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: calc(var(--radius-md) - 2px);
+}
+
+.upload-change-hint {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.6rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.upload-card.has-preview {
+  padding: 0;
+  border-style: solid;
+  border-color: var(--border);
+}
+
+.upload-card.has-preview .upload-preview {
+  display: block;
+}
+
+.upload-card.has-preview .upload-placeholder {
+  display: none;
+}
+
+.upload-card.has-preview .upload-change-hint {
+  display: block;
+}
+
+.upload-title {
+  display: block;
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem;
+}
+
+.upload-subtext {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.occasion-block {
+  margin-top: 1.1rem;
+}
+
+.field-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.chip-row {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text);
+  padding: 0.48rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.chip.active {
+  border-color: rgba(38, 38, 43, 0.28);
+  background: #f1edf8;
+}
+
+.primary-btn,
+.secondary-btn,
+.text-link {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.primary-btn,
+.secondary-btn {
+  border: 0;
+  padding: 0.95rem 1rem;
+}
+
+.primary-btn {
+  margin-top: 1.2rem;
+  background: var(--button);
+  color: var(--button-text);
+}
+
+.primary-btn:disabled {
+  opacity: 0.5;
+}
+
+.secondary-btn {
+  margin-top: 0.7rem;
+  background: #ece8f3;
+  color: var(--text);
+}
+
+.text-link {
+  display: inline-block;
+  margin-top: 0.9rem;
+  color: var(--muted);
+  border: 0;
+  background: transparent;
+}
+
+.status {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.error {
+  color: var(--danger);
+}
+
+.processing-state {
+  position: fixed;
+  inset: 0;
+  background: rgba(246, 244, 250, 0.92);
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 1rem;
+  z-index: 20;
+}
+
+.processing-card {
+  width: min(100%, 390px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.processing-card h2 {
+  margin-top: 0.65rem;
+  font-family: "Playfair Display", serif;
+  font-size: 1.8rem;
+}
+
+.processing-card p {
+  margin-top: 0.55rem;
+  color: var(--muted);
+}
+
+.pulse-dot {
+  margin: 0 auto;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--button);
+  box-shadow: 0 0 0 0 rgba(38, 38, 43, 0.4);
+  animation: pulse 1.5s infinite;
+}
+
+.hero-image {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  background: #ece8f3;
+  width: 100%;
+  max-width: 430px;
+  height: clamp(300px, 48vh, 420px);
+  margin: 0.6rem auto 0;
+}
+
+.hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.hero-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(24, 24, 27, 0.5) 0%, rgba(24, 24, 27, 0.08) 60%);
+}
+
+.look-label {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 1;
+  color: #fff;
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem;
+}
+
+.result-card {
+  padding: 1rem;
+}
+
+.score-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.score-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.score-value {
+  font-family: "Playfair Display", serif;
+  font-size: 2rem;
+}
+
+.score-track {
+  margin-top: 0.7rem;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #ebe5da;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--score-yellow), var(--score-green));
+}
+
+.subscores {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.subscore {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  text-align: center;
+  padding: 0.65rem 0.4rem;
+}
+
+.subscore-value {
+  font-family: "Playfair Display", serif;
+  font-size: 1.5rem;
+}
+
+.subscore-label {
+  margin-top: 0.1rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.result-section-title {
+  margin-top: 1.1rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.result-bullets {
+  margin-top: 0.45rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.result-bullet {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 0.62rem 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(38, 38, 43, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(38, 38, 43, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(38, 38, 43, 0);
+  }
+}
+
+@media (min-width: 700px) {
+  .app-shell {
+    padding-top: 1.5rem;
+  }
+
+  .capture-card,
+  .result-card,
+  .cta-card {
+    padding: 1.25rem;
+  }
+}
