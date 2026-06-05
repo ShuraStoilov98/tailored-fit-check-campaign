@@ -19,6 +19,28 @@ const colourScoreEl = document.getElementById("colour-score");
 const whatWorksBlock = document.getElementById("what-works");
 const improvementsBlock = document.getElementById("improvements");
 const appCta = document.getElementById("app-cta");
+const leadForm = document.getElementById("lead-form");
+const leadEmailInput = document.getElementById("lead-email");
+const leadConsentCheckbox = document.getElementById("lead-consent-checkbox");
+const leadSubmitBtn = document.getElementById("lead-submit");
+const leadMsg = document.getElementById("lead-msg");
+
+let _parsed = null;
+
+function logEvent(eventType) {
+  fetch("/api/event", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      event_type: eventType,
+      campaign_id: campaignContext.campaign_id,
+      source: campaignContext.source,
+      slug: campaignContext.short_link_slug,
+    }),
+  }).catch(() => {});
+}
+
+appCta.addEventListener("click", () => logEvent("app_cta_clicked"));
 
 bindLogoFallback();
 
@@ -43,6 +65,7 @@ function hydrateResult(rawValue) {
     return;
   }
 
+  _parsed = parsed;
   const r = parsed.result;
 
   resultImage.src = parsed.image_preview;
@@ -131,3 +154,71 @@ function redirectHome() {
   if (campaignContext.short_link_slug) homeUrl.searchParams.set("slug", campaignContext.short_link_slug);
   window.location.replace(homeUrl.toString());
 }
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+function showLeadMsg(text, type) {
+  leadMsg.textContent = text;
+  leadMsg.className = `lead-message ${type}`;
+}
+
+function clearLeadMsg() {
+  leadMsg.textContent = "";
+  leadMsg.className = "lead-message hidden";
+}
+
+leadForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  clearLeadMsg();
+
+  const email = leadEmailInput.value.trim();
+  if (!isValidEmail(email)) {
+    showLeadMsg("Please enter a valid email.", "error");
+    return;
+  }
+  if (!leadConsentCheckbox.checked) {
+    showLeadMsg("Please confirm you're happy to receive Tailored updates.", "error");
+    return;
+  }
+
+  leadSubmitBtn.disabled = true;
+  leadSubmitBtn.textContent = "Joining...";
+
+  const ctx = _parsed?.campaign_context || campaignContext;
+  const r = _parsed?.result || {};
+
+  try {
+    const response = await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        marketing_consent: true,
+        campaign_id: ctx.campaign_id || "",
+        source: ctx.source || "",
+        slug: ctx.short_link_slug || "",
+        occasion: _parsed?.selected_occasion || "",
+        verdict_label: r.verdict_label || "",
+        overall_score: r.overall_score ?? null,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || "We couldn't save your email just now. Please try again.");
+    }
+
+    leadEmailInput.disabled = true;
+    leadConsentCheckbox.disabled = true;
+    leadSubmitBtn.disabled = true;
+    leadSubmitBtn.textContent = "Joined";
+    showLeadMsg("You're in — welcome to the early Tailored community.", "success");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "We couldn't save your email just now. Please try again.";
+    showLeadMsg(message, "error");
+    leadSubmitBtn.disabled = false;
+    leadSubmitBtn.textContent = "Join the community";
+  }
+});

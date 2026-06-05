@@ -23,6 +23,22 @@ const campaignContext = {
   short_link_slug: params.get("slug") || "",
 };
 
+function logEvent(eventType, extra = {}) {
+  fetch("/api/event", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      event_type: eventType,
+      campaign_id: campaignContext.campaign_id,
+      source: campaignContext.source,
+      slug: campaignContext.short_link_slug,
+      occasion: extra.occasion || "",
+    }),
+  }).catch(() => {});
+}
+
+logEvent("page_view");
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearError();
@@ -135,6 +151,7 @@ function bindPhotoInput() {
     }
 
     submitButton.disabled = false;
+    logEvent("photo_selected");
 
     const reader = new FileReader();
     reader.onload = (e) => {

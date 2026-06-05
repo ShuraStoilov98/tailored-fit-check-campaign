@@ -106,6 +106,7 @@ p {
 
 .capture-card,
 .result-card,
+.lead-card,
 .cta-card {
   margin-top: 1.1rem;
   background: var(--card);
@@ -116,6 +117,7 @@ p {
 }
 
 .result-page .result-card,
+.result-page .lead-card,
 .result-page .cta-card {
   margin-top: 0.75rem;
 }
@@ -448,6 +450,106 @@ p {
   line-height: 1.35;
 }
 
+.lead-heading {
+  font-family: "Playfair Display", serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.lead-subcopy {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.lead-message {
+  margin-top: 0.7rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.lead-message.error {
+  color: var(--danger);
+}
+
+.lead-message.success {
+  color: #3a6b49;
+}
+
+.lead-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.72rem 0.9rem;
+  border: 1px solid rgba(31, 31, 34, 0.15);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.lead-input:focus {
+  border-color: rgba(31, 31, 34, 0.35);
+}
+
+.lead-input:disabled {
+  opacity: 0.6;
+  background: #f5f3f0;
+}
+
+.lead-consent {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin-top: 0.75rem;
+  cursor: pointer;
+}
+
+.lead-checkbox {
+  margin-top: 0.18rem;
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: var(--button);
+}
+
+.lead-checkbox:disabled {
+  cursor: not-allowed;
+}
+
+.lead-consent-text {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.lead-submit-btn {
+  display: block;
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.88rem 1rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--button);
+  color: var(--button-text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.lead-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .hidden {
   display: none;
 }
@@ -471,6 +573,7 @@ p {
 
   .capture-card,
   .result-card,
+  .lead-card,
   .cta-card {
     padding: 1.25rem;
   }
