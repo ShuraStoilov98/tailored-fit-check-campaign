@@ -9,8 +9,10 @@ const processingState = document.getElementById("processing-state");
 const chips = Array.from(document.querySelectorAll(".chip"));
 const brandLogo = document.getElementById("brand-logo");
 const logoFallback = document.getElementById("logo-fallback");
+const modalState = createModal();
 
 const STORAGE_KEY = "fitCheckResult";
+const NO_OUTFIT_ERROR_CODE = "NO_OUTFIT_DETECTED";
 
 bindLogoFallback();
 bindOccasionChips();
@@ -77,7 +79,8 @@ form.addEventListener("submit", async (event) => {
 
     const payload = await response.json();
     if (!response.ok) {
-      throw new Error(payload.error || "Could not generate your Fit Check right now.");
+      handleFitCheckError(payload);
+      return;
     }
 
     sessionStorage.setItem(
@@ -103,8 +106,10 @@ form.addEventListener("submit", async (event) => {
 
     window.location.assign(resultUrl.toString());
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Something went wrong. Please try again.";
-    showError(message);
+    showRetryModal(
+      "Fit Check unavailable",
+      "We couldn't complete your Fit Check just now. Please try again in a moment."
+    );
   } finally {
     setLoading(false);
   }
@@ -123,6 +128,23 @@ function showError(message) {
 function clearError() {
   errorState.textContent = "";
   errorState.classList.add("hidden");
+}
+
+function handleFitCheckError(payload) {
+  const errorCode = typeof payload?.error_code === "string" ? payload.error_code : "";
+  if (errorCode === NO_OUTFIT_ERROR_CODE) {
+    resetCapturePhoto();
+    showRetryModal(
+      "No outfit detected",
+      "Please try again with a clear outfit photo."
+    );
+    return;
+  }
+
+  showRetryModal(
+    "Fit Check unavailable",
+    "We couldn't complete your Fit Check just now. Please try again in a moment."
+  );
 }
 
 function bindOccasionChips() {
@@ -144,9 +166,7 @@ function bindPhotoInput() {
   photoInput.addEventListener("change", () => {
     const file = photoInput.files?.[0];
     if (!file) {
-      submitButton.disabled = true;
-      uploadCard.classList.remove("has-preview");
-      uploadPreview.src = "";
+      resetCapturePhoto();
       return;
     }
 
@@ -160,6 +180,13 @@ function bindPhotoInput() {
     };
     reader.readAsDataURL(file);
   });
+}
+
+function resetCapturePhoto() {
+  photoInput.value = "";
+  submitButton.disabled = true;
+  uploadCard.classList.remove("has-preview");
+  uploadPreview.src = "";
 }
 
 function bindLogoFallback() {
@@ -187,3 +214,49 @@ function toDataUrl(file) {
   });
 }
 
+function createModal() {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay hidden";
+  overlay.innerHTML = `
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-body">
+      <p id="modal-title" class="modal-title"></p>
+      <p id="modal-body" class="modal-body"></p>
+      <button type="button" class="primary-btn modal-button">Try again</button>
+    </div>
+  `;
+
+  const title = overlay.querySelector("#modal-title");
+  const body = overlay.querySelector("#modal-body");
+  const button = overlay.querySelector(".modal-button");
+
+  button.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      closeModal();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !overlay.classList.contains("hidden")) {
+      closeModal();
+    }
+  });
+
+  document.body.appendChild(overlay);
+  return { overlay, title, body, button };
+}
+
+function showRetryModal(title, body) {
+  clearError();
+  processingState.classList.add("hidden");
+  modalState.title.textContent = title;
+  modalState.body.textContent = body;
+  modalState.overlay.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  modalState.button.focus();
+}
+
+function closeModal() {
+  modalState.overlay.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  uploadCard.focus();
+}

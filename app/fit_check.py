@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from app.config import get_settings
 from app.prompts import SYSTEM_PROMPT, build_user_message
-from app.schemas import FitCheckResponse
+from app.schemas import FitCheckModelOutput, FitCheckResponse
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +44,16 @@ async def generate_fit_check(
     image_bytes: bytes,
     content_type: str,
     occasion: str | None,
-) -> FitCheckResponse:
+) -> FitCheckModelOutput:
     settings = get_settings()
 
     if not settings.openai_api_key:
         if settings.environment == "local":
             logger.info("OPENAI_API_KEY not set; returning mock Fit Check.")
-            return _MOCK_RESPONSE
+            return FitCheckModelOutput(
+                outfit_detected=True,
+                fit_check=_MOCK_RESPONSE,
+            )
         raise HTTPException(status_code=500, detail="Service configuration error.")
 
     b64 = base64.standard_b64encode(image_bytes).decode()
@@ -88,11 +91,12 @@ async def generate_fit_check(
 
     try:
         data = json.loads(raw)
-        # Clamp scores to valid range before Pydantic validates them.
-        for field in ("overall_score", "fit_score", "style_score", "colour_score"):
-            if isinstance(data.get(field), (int, float)):
-                data[field] = max(1, min(5, int(data[field])))
-        return FitCheckResponse(**data)
+        fit_check = data.get("fit_check")
+        if isinstance(fit_check, dict):
+            for field in ("overall_score", "fit_score", "style_score", "colour_score"):
+                if isinstance(fit_check.get(field), (int, float)):
+                    fit_check[field] = max(1, min(5, int(fit_check[field])))
+        return FitCheckModelOutput(**data)
     except (json.JSONDecodeError, ValidationError, TypeError, KeyError) as exc:
         logger.warning("Response parse error: %s | raw: %.200s", exc, raw)
         raise HTTPException(

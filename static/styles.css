@@ -32,6 +32,10 @@ body {
     var(--bg);
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 h1,
 h2,
 h3,
@@ -295,6 +299,44 @@ p {
   justify-items: center;
   padding: 1rem;
   z-index: 20;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 1rem;
+  background: rgba(201, 189, 223, 0.42);
+  backdrop-filter: blur(10px);
+  z-index: 30;
+}
+
+.modal-card {
+  width: min(100%, 360px);
+  background: var(--card);
+  border: 1px solid rgba(31, 31, 34, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 22px 50px rgba(31, 31, 34, 0.16);
+  padding: 1.35rem 1.1rem 1.1rem;
+}
+
+.modal-title {
+  font-family: "Playfair Display", serif;
+  font-size: 1.45rem;
+  letter-spacing: -0.02em;
+}
+
+.modal-body {
+  margin-top: 0.55rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.modal-button {
+  margin-top: 1rem;
 }
 
 .processing-card {

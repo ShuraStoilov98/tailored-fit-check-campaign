@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 ScoreInt = Annotated[int, Field(ge=1, le=5)]
 
@@ -29,6 +29,20 @@ class FitCheckResponse(BaseModel):
     tailored_tip: str
 
 
+class FitCheckModelOutput(BaseModel):
+    outfit_detected: bool
+    no_outfit_message: str = "No outfit detected. Please try again with a clear outfit photo."
+    fit_check: FitCheckResponse | None = None
+
+    @model_validator(mode="after")
+    def validate_fit_check_payload(self) -> "FitCheckModelOutput":
+        if self.outfit_detected and self.fit_check is None:
+            raise ValueError("fit_check is required when outfit_detected is true")
+        if not self.outfit_detected:
+            self.fit_check = None
+        return self
+
+
 class EventLogRequest(BaseModel):
     event_type: str = Field(max_length=80)
     campaign_id: str = Field(default="", max_length=120)
@@ -50,6 +64,7 @@ class LeadRequest(BaseModel):
 
 class ErrorResponse(BaseModel):
     error: str
+    error_code: str | None = None
 
 
 class PublicConfigResponse(BaseModel):

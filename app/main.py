@@ -26,11 +26,31 @@ STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+NO_OUTFIT_ERROR_CODE = "NO_OUTFIT_DETECTED"
+NO_OUTFIT_ERROR_MESSAGE = "No outfit detected. Please try again with a clear outfit photo."
+
+
+def _build_error_response(detail: str | dict) -> ErrorResponse:
+    if isinstance(detail, dict):
+        return ErrorResponse(
+            error=str(detail.get("error") or "Something went wrong."),
+            error_code=str(detail["error_code"]) if detail.get("error_code") else None,
+        )
+    return ErrorResponse(error=str(detail))
+
+
+def _error_message_for_logging(detail: str | dict) -> str:
+    if isinstance(detail, dict):
+        return str(detail.get("error_code") or detail.get("error") or "error")
+    return str(detail)
+
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(_: Request, exc: StarletteHTTPException) -> JSONResponse:
-    detail = exc.detail if isinstance(exc.detail, str) else "Something went wrong."
-    return JSONResponse(status_code=exc.status_code, content=ErrorResponse(error=detail).model_dump())
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=_build_error_response(exc.detail).model_dump(exclude_none=True),
+    )
 
 
 @app.exception_handler(RequestValidationError)
@@ -104,23 +124,33 @@ async def fit_check(
     fire_and_forget(log_event(settings.google_sheet_webhook_url, "fit_check_started", **log_kwargs))
 
     try:
-        fit_result = await generate_fit_check(
+        model_output = await generate_fit_check(
             image_bytes=image_bytes,
             content_type=image.content_type or "",
             occasion=occasion,
         )
+
+        if not model_output.outfit_detected or model_output.fit_check is None:
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "error_code": NO_OUTFIT_ERROR_CODE,
+                    "error": model_output.no_outfit_message or NO_OUTFIT_ERROR_MESSAGE,
+                },
+            )
     except HTTPException as exc:
         fire_and_forget(
             log_event(
                 settings.google_sheet_webhook_url,
                 "error",
                 success=False,
-                error_message=str(exc.detail),
+                error_message=_error_message_for_logging(exc.detail),
                 **log_kwargs,
             )
         )
         raise
 
+    fit_result = model_output.fit_check
     fire_and_forget(
         log_event(
             settings.google_sheet_webhook_url,
