@@ -1,5 +1,6 @@
 const form = document.getElementById("fit-check-form");
 const photoInput = document.getElementById("photo");
+const cameraInput = document.getElementById("photo-camera");
 const occasionInput = document.getElementById("occasion-input");
 const submitButton = document.getElementById("submit-button");
 const uploadCard = document.getElementById("upload-card");
@@ -9,14 +10,20 @@ const processingState = document.getElementById("processing-state");
 const chips = Array.from(document.querySelectorAll(".chip"));
 const brandLogo = document.getElementById("brand-logo");
 const logoFallback = document.getElementById("logo-fallback");
+const pickerOverlay = document.getElementById("photo-picker-overlay");
+const pickerCameraBtn = document.getElementById("picker-camera");
+const pickerGalleryBtn = document.getElementById("picker-gallery");
 const modalState = createModal();
+
+let selectedFile = null;
 
 const STORAGE_KEY = "fitCheckResult";
 const NO_OUTFIT_ERROR_CODE = "NO_OUTFIT_DETECTED";
 
 bindLogoFallback();
 bindOccasionChips();
-bindPhotoInput();
+bindPhotoInputs();
+bindPhotoPicker();
 
 const params = new URLSearchParams(window.location.search);
 const campaignContext = {
@@ -45,7 +52,7 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearError();
 
-  const file = photoInput.files?.[0];
+  const file = selectedFile;
   if (!file) {
     showError("Please choose a photo first.");
     return;
@@ -162,28 +169,75 @@ function bindOccasionChips() {
   });
 }
 
-function bindPhotoInput() {
-  photoInput.addEventListener("change", () => {
-    const file = photoInput.files?.[0];
-    if (!file) {
-      resetCapturePhoto();
-      return;
-    }
+function bindPhotoInputs() {
+  [photoInput, cameraInput].forEach((input) => {
+    input.addEventListener("change", () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      selectedFile = file;
+      submitButton.disabled = false;
+      logEvent("photo_selected");
 
-    submitButton.disabled = false;
-    logEvent("photo_selected");
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      uploadPreview.src = String(e.target?.result || "");
-      uploadCard.classList.add("has-preview");
-    };
-    reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadPreview.src = String(e.target?.result || "");
+        uploadCard.classList.add("has-preview");
+      };
+      reader.readAsDataURL(file);
+    });
   });
+}
+
+function bindPhotoPicker() {
+  uploadCard.addEventListener("click", (e) => {
+    e.preventDefault();
+    openPhotoPicker();
+  });
+
+  uploadCard.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openPhotoPicker();
+    }
+  });
+
+  pickerCameraBtn.addEventListener("click", () => {
+    closePhotoPicker();
+    cameraInput.click();
+  });
+
+  pickerGalleryBtn.addEventListener("click", () => {
+    closePhotoPicker();
+    photoInput.click();
+  });
+
+  pickerOverlay.addEventListener("click", (e) => {
+    if (e.target === pickerOverlay) closePhotoPicker();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !pickerOverlay.classList.contains("hidden")) {
+      closePhotoPicker();
+    }
+  });
+}
+
+function openPhotoPicker() {
+  pickerOverlay.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  pickerCameraBtn.focus();
+}
+
+function closePhotoPicker() {
+  pickerOverlay.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  uploadCard.focus();
 }
 
 function resetCapturePhoto() {
   photoInput.value = "";
+  cameraInput.value = "";
+  selectedFile = null;
   submitButton.disabled = true;
   uploadCard.classList.remove("has-preview");
   uploadPreview.src = "";

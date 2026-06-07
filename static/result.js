@@ -19,6 +19,15 @@ const colourScoreEl = document.getElementById("colour-score");
 const whatWorksBlock = document.getElementById("what-works");
 const improvementsBlock = document.getElementById("improvements");
 const appCta = document.getElementById("app-cta");
+const googlePlayBtn = document.getElementById("google-play-btn");
+const androidOverlay = document.getElementById("android-overlay");
+const androidBackBtn = document.getElementById("android-back");
+const androidLeadForm = document.getElementById("android-lead-form");
+const androidEmailInput = document.getElementById("android-email");
+const androidConsentCheckbox = document.getElementById("android-consent-checkbox");
+const androidSubmitBtn = document.getElementById("android-submit");
+const androidLeadMsg = document.getElementById("android-lead-msg");
+const androidSuccess = document.getElementById("android-success");
 const leadHeading = document.getElementById("lead-heading");
 const leadSubcopy = document.getElementById("lead-subcopy");
 const leadForm = document.getElementById("lead-form");
@@ -44,6 +53,18 @@ function logEvent(eventType) {
 }
 
 appCta.addEventListener("click", () => logEvent("app_cta_clicked"));
+
+googlePlayBtn.addEventListener("click", () => {
+  logEvent("google_play_cta_clicked");
+  if (!androidOverlay) return;
+  androidOverlay.classList.remove("hidden");
+  androidOverlay.scrollTop = 0;
+  if (androidBackBtn) androidBackBtn.focus();
+});
+
+androidBackBtn.addEventListener("click", () => {
+  androidOverlay.classList.add("hidden");
+});
 
 bindLogoFallback();
 
@@ -76,13 +97,14 @@ function hydrateResult(rawValue) {
 
   const overall = r.overall_score ?? 4;
   const max = 5;
-  overallScoreEl.textContent = `${overall}/${max}`;
+  overallScoreEl.textContent = formatScore(overall, max);
   overallScoreFill.style.width = `${(overall / max) * 100}%`;
+  overallScoreFill.dataset.scoreState = getScoreState(overall);
   overallScoreFill.closest("[role='progressbar']").setAttribute("aria-valuenow", String(overall));
 
-  if (fitScoreEl) fitScoreEl.textContent = String(r.fit_score ?? 4);
-  if (styleScoreEl) styleScoreEl.textContent = String(r.style_score ?? 3);
-  if (colourScoreEl) colourScoreEl.textContent = String(r.colour_score ?? 4);
+  if (fitScoreEl) applySubscore(fitScoreEl, r.fit_score ?? 4, max);
+  if (styleScoreEl) applySubscore(styleScoreEl, r.style_score ?? 3, max);
+  if (colourScoreEl) applySubscore(colourScoreEl, r.colour_score ?? 4, max);
 
   renderBullets(whatWorksBlock, r.what_works || [], [
     "Balanced base",
@@ -102,12 +124,45 @@ function hydrateResult(rawValue) {
 function renderBullets(container, items, defaults, count) {
   const merged = [...items, ...defaults].slice(0, count);
   container.innerHTML = "";
-  merged.forEach((item) => {
+  merged.forEach((item, index) => {
     const el = document.createElement("div");
     el.className = "result-bullet";
-    el.textContent = item;
+    const marker = document.createElement("span");
+    marker.className = "result-bullet-marker";
+    marker.textContent = String(index + 1);
+
+    const text = document.createElement("span");
+    text.className = "result-bullet-text";
+    text.textContent = stripBulletPrefix(item);
+
+    el.append(marker, text);
     container.appendChild(el);
   });
+}
+
+function formatScore(score, max) {
+  return `${score}/${max}`;
+}
+
+function applySubscore(element, score, max) {
+  element.textContent = formatScore(score, max);
+
+  const card = element.closest(".subscore");
+  if (!card) return;
+
+  const percent = `${(score / max) * 100}%`;
+  card.style.setProperty("--score-percent", percent);
+  card.dataset.scoreState = getScoreState(score);
+}
+
+function getScoreState(score) {
+  if (score <= 2) return "low";
+  if (score === 3) return "medium";
+  return "high";
+}
+
+function stripBulletPrefix(item) {
+  return String(item || "").replace(/^\s*(?:\d+[\).:-]\s*|[-*]\s+)/, "").trim();
 }
 
 function deriveLookLabel(occasion, verdict) {
@@ -157,6 +212,61 @@ function redirectHome() {
   if (campaignContext.short_link_slug) homeUrl.searchParams.set("slug", campaignContext.short_link_slug);
   window.location.replace(homeUrl.toString());
 }
+
+androidLeadForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  androidLeadMsg.textContent = "";
+  androidLeadMsg.className = "lead-message hidden";
+
+  const email = androidEmailInput.value.trim();
+  if (!isValidEmail(email)) {
+    androidLeadMsg.textContent = "Please enter a valid email.";
+    androidLeadMsg.className = "lead-message error";
+    return;
+  }
+  if (!androidConsentCheckbox.checked) {
+    androidLeadMsg.textContent = "Please confirm you're happy to receive Tailored updates.";
+    androidLeadMsg.className = "lead-message error";
+    return;
+  }
+
+  androidSubmitBtn.disabled = true;
+  androidSubmitBtn.textContent = "Registering...";
+
+  const ctx = _parsed?.campaign_context || campaignContext;
+
+  try {
+    const response = await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        marketing_consent: true,
+        campaign_id: ctx.campaign_id || "",
+        source: "android_waitlist",
+        slug: ctx.short_link_slug || "",
+        occasion: _parsed?.selected_occasion || "",
+        verdict_label: _parsed?.result?.verdict_label || "",
+        overall_score: _parsed?.result?.overall_score ?? null,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || "We couldn't save your email just now. Please try again.");
+    }
+
+    androidLeadForm.classList.add("hidden");
+    androidSuccess.classList.remove("hidden");
+    logEvent("android_waitlist_submitted");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "We couldn't save your email just now. Please try again.";
+    androidLeadMsg.textContent = message;
+    androidLeadMsg.className = "lead-message error";
+    androidSubmitBtn.disabled = false;
+    androidSubmitBtn.textContent = "Notify me when Android app is live";
+  }
+});
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
