@@ -23,15 +23,15 @@ Goal: clean project skeleton.
 
 Tasks:
 
-* [ ] Create GitHub repo: `tailored-fit-check-campaign`
-* [ ] Add README.md
-* [ ] Add AGENTS.md
-* [ ] Add PLAN.md
-* [ ] Add `.gitignore`
-* [ ] Add `.env.example`
-* [ ] Add `requirements.txt`
-* [ ] Add `Dockerfile`
-* [ ] Add base folders: `app/`, `static/`, `tests/`
+* [x] Create GitHub repo: `tailored-fit-check-campaign`
+* [x] Add README.md
+* [x] Add AGENTS.md
+* [x] Add PLAN.md
+* [x] Add `.gitignore`
+* [x] Add `.env.example`
+* [x] Add `requirements.txt`
+* [x] Add `Dockerfile`
+* [x] Add base folders: `app/`, `static/`, `tests/`
 
 Acceptance criteria:
 
@@ -45,12 +45,12 @@ Goal: local app runs with static frontend and health route.
 
 Tasks:
 
-* [ ] Implement FastAPI app in `app/main.py`
-* [ ] Serve `static/index.html` at `/`
-* [ ] Add `/health` route
-* [ ] Add basic config loading from environment variables
-* [ ] Add minimal CSS and JS files
-* [ ] Add local run instructions
+* [x] Implement FastAPI app in `app/main.py`
+* [x] Serve `static/index.html` at `/`
+* [x] Add `/health` route
+* [x] Add basic config loading from environment variables
+* [x] Add minimal CSS and JS files
+* [x] Add local run instructions
 
 Acceptance criteria:
 
@@ -64,15 +64,15 @@ Goal: mobile-first Fit Check UI.
 
 Tasks:
 
-* [ ] Create landing headline and explanation
-* [ ] Add photo upload / camera capture input
-* [ ] Add optional occasion selector
-* [ ] Add “Get my Fit Check” button
-* [ ] Add loading state
-* [ ] Add result card layout
-* [ ] Add app download CTA
-* [ ] Add email capture CTA after result
-* [ ] Preserve campaign parameters from URL
+* [x] Create landing headline and explanation
+* [x] Add photo upload / camera capture input
+* [x] Add optional occasion selector
+* [x] Add “Get my Fit Check” button
+* [x] Add loading state
+* [x] Add result card layout
+* [x] Add app download CTA
+* [x] Add email capture CTA after result
+* [x] Preserve campaign parameters from URL
 
 Suggested landing copy:
 
@@ -102,14 +102,14 @@ Goal: backend accepts image and returns structured result.
 
 Tasks:
 
-* [ ] Add `POST /api/fit-check`
-* [ ] Validate image file type
-* [ ] Validate image size
-* [ ] Accept optional occasion and campaign ID
-* [ ] Add OpenAI vision call
-* [ ] Add structured response schema
-* [ ] Add friendly error handling
-* [ ] Ensure uploaded photos are not stored
+* [x] Add `POST /api/fit-check`
+* [x] Validate image file type
+* [x] Validate image size
+* [x] Accept optional occasion and campaign ID
+* [x] Add OpenAI vision call
+* [x] Add structured response schema
+* [x] Add friendly error handling
+* [x] Ensure uploaded photos are not stored
 
 Response shape:
 
@@ -144,13 +144,13 @@ Goal: make output feel premium and safe.
 
 Tasks:
 
-* [ ] Create system prompt in `app/prompts.py`
-* [ ] Keep feedback outfit-focused
-* [ ] Avoid body comments
-* [ ] Avoid harsh ratings
-* [ ] Avoid numerical scores
-* [ ] Return concise, structured JSON
-* [ ] Test with at least 20 outfit images
+* [x] Create system prompt in `app/prompts.py`
+* [x] Keep feedback outfit-focused
+* [x] Avoid body comments
+* [x] Avoid harsh ratings
+* [x] Avoid numerical scores
+* [x] Return concise, structured JSON
+* [x] Test with at least 20 outfit images
 
 Verdict labels to use:
 
@@ -175,19 +175,19 @@ Goal: capture campaign analytics.
 
 Tasks:
 
-* [ ] Add `POST /api/event`
-* [ ] Add event logging helper
-* [ ] Log events to Google Sheet webhook or temporary backend logs
-* [ ] Include campaign ID, event type, timestamp
-* [ ] Log frontend events:
+* [x] Add `POST /api/event`
+* [x] Add event logging helper
+* [x] Log events to Google Sheet webhook or temporary backend logs
+* [x] Include campaign ID, event type, timestamp
+* [x] Log frontend events:
 
-  * [ ] page_view
-  * [ ] photo_selected
-  * [ ] fit_check_started
-  * [ ] fit_check_completed
-  * [ ] app_cta_clicked
-  * [ ] email_submitted
-  * [ ] error
+  * [x] page_view
+  * [x] photo_selected
+  * [x] fit_check_started
+  * [x] fit_check_completed
+  * [x] app_cta_clicked
+  * [x] email_submitted
+  * [x] error
 
 Acceptance criteria:
 
@@ -201,12 +201,12 @@ Goal: collect emails after the user receives value.
 
 Tasks:
 
-* [ ] Add email input after result
-* [ ] Add explicit marketing consent checkbox
-* [ ] Add `POST /api/lead`
-* [ ] Validate email format
-* [ ] Log lead to Google Sheet or email tool
-* [ ] Show confirmation message
+* [x] Add email input after result
+* [x] Add explicit marketing consent checkbox
+* [x] Add `POST /api/lead`
+* [x] Validate email format
+* [x] Log lead to Google Sheet or email tool
+* [x] Show confirmation message
 
 Suggested copy:
 
@@ -228,14 +228,14 @@ Goal: deploy live v1.
 
 Tasks:
 
-* [ ] Add Dockerfile
-* [ ] Connect GitHub repo to Railway
-* [ ] Set Railway environment variables
-* [ ] Deploy
-* [ ] Verify `/health`
-* [ ] Verify homepage
-* [ ] Verify fit check flow
-* [ ] Test from mobile
+* [x] Add Dockerfile
+* [x] Connect GitHub repo to Railway
+* [x] Set Railway environment variables
+* [x] Deploy
+* [x] Verify `/health`
+* [x] Verify homepage
+* [x] Verify fit check flow
+* [x] Test from mobile
 
 Required environment variables:
 
@@ -259,12 +259,12 @@ Goal: connect Short.io and App Store campaign tracking.
 
 Tasks:
 
-* [ ] Create Short.io entry link for campaign
-* [ ] Destination points to Railway URL with campaign parameter
-* [ ] Generate QR code from Short.io
-* [ ] Create post-result app CTA Short.io link
-* [ ] App CTA link points to Apple Campaign Link
-* [ ] Test Short.io click analytics
+* [x] Create Short.io entry link for campaign
+* [x] Destination points to Railway URL with campaign parameter
+* [x] Generate QR code from Short.io
+* [x] Create post-result app CTA Short.io link
+* [x] App CTA link points to Apple Campaign Link
+* [x] Test Short.io click analytics
 
 Example links:
 
@@ -287,16 +287,16 @@ Goal: make sure it is safe for public testing.
 
 Tasks:
 
-* [ ] Test 20 outfit images
+* [x] Test 20 outfit images
 * [ ] Test poor lighting
 * [ ] Test large image file
 * [ ] Test unsupported file type
-* [ ] Test no occasion selected
-* [ ] Test app CTA
-* [ ] Test email submission
-* [ ] Test mobile Safari
+* [x] Test no occasion selected
+* [x] Test app CTA
+* [x] Test email submission
+* [x] Test mobile Safari
 * [ ] Test mobile Chrome
-* [ ] Test QR scan from phone
+* [x] Test QR scan from phone
 
 Acceptance criteria:
 

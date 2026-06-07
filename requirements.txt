@@ -5,3 +5,5 @@ pydantic-settings
 pydantic[email]
 openai
 httpx
+Pillow
+pillow-heif

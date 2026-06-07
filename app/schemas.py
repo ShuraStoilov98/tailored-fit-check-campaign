@@ -49,6 +49,7 @@ class EventLogRequest(BaseModel):
     source: str = Field(default="", max_length=80)
     slug: str = Field(default="", max_length=120)
     occasion: str = Field(default="", max_length=80)
+    error_message: str = Field(default="", max_length=120)
 
 
 class LeadRequest(BaseModel):

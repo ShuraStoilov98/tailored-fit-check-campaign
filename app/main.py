@@ -9,6 +9,11 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.config import get_settings
 from app.event_logging import fire_and_forget, log_event, log_lead
 from app.fit_check import generate_fit_check
+from app.image_processing import (
+    ImageTooLargeError,
+    UnsupportedImageFormatError,
+    normalize_uploaded_image_bytes,
+)
 from app.schemas import (
     ErrorResponse,
     EventLogRequest,
@@ -28,6 +33,8 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 NO_OUTFIT_ERROR_CODE = "NO_OUTFIT_DETECTED"
 NO_OUTFIT_ERROR_MESSAGE = "No outfit detected. Please try again with a clear outfit photo."
+IMAGE_TOO_LARGE_ERROR_CODE = "IMAGE_TOO_LARGE"
+UNSUPPORTED_IMAGE_FORMAT_ERROR_CODE = "UNSUPPORTED_IMAGE_FORMAT"
 
 
 def _build_error_response(detail: str | dict) -> ErrorResponse:
@@ -104,14 +111,38 @@ async def fit_check(
         short_link_slug=slug,
     )
 
-    if image.content_type not in settings.allowed_image_types:
-        raise HTTPException(status_code=400, detail="Please upload a JPG, PNG, or WEBP image.")
-
-    image_bytes = await image.read()
-    if len(image_bytes) > settings.max_upload_mb * 1024 * 1024:
+    if image.content_type and image.content_type not in settings.allowed_image_types:
         raise HTTPException(
             status_code=400,
-            detail=f"Image is too large. Max size is {settings.max_upload_mb} MB.",
+            detail={
+                "error_code": UNSUPPORTED_IMAGE_FORMAT_ERROR_CODE,
+                "error": "This photo format is not supported. Please take a new photo or choose a JPEG/PNG image.",
+            },
+        )
+
+    image_bytes = await image.read()
+    try:
+        image_bytes, image_content_type = normalize_uploaded_image_bytes(
+            image_bytes,
+            image.content_type or "",
+            image.filename,
+            max_upload_mb=settings.max_upload_mb,
+        )
+    except UnsupportedImageFormatError:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error_code": UNSUPPORTED_IMAGE_FORMAT_ERROR_CODE,
+                "error": "This photo format is not supported. Please take a new photo or choose a JPEG/PNG image.",
+            },
+        )
+    except ImageTooLargeError:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error_code": IMAGE_TOO_LARGE_ERROR_CODE,
+                "error": "This photo is too large. Please try a screenshot or a smaller image.",
+            },
         )
 
     log_kwargs = dict(
@@ -126,7 +157,7 @@ async def fit_check(
     try:
         model_output = await generate_fit_check(
             image_bytes=image_bytes,
-            content_type=image.content_type or "",
+            content_type=image_content_type,
             occasion=occasion,
         )
 
@@ -217,6 +248,7 @@ async def track_event(payload: EventLogRequest) -> Response:
             slug=payload.slug,
             occasion=payload.occasion,
             environment=settings.environment,
+            error_message=payload.error_message,
         )
     )
     return Response(status_code=204)

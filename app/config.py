@@ -14,6 +14,10 @@ class Settings(BaseSettings):
         "image/jpeg",
         "image/png",
         "image/webp",
+        "image/heic",
+        "image/heif",
+        "image/heif-sequence",
+        "application/octet-stream",
     )
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
