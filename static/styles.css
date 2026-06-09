@@ -134,6 +134,10 @@ p {
   padding: 1rem;
 }
 
+.capture-page .download-card {
+  margin-top: 1.5rem;
+}
+
 .result-page .result-card,
 .result-page .download-card,
 .result-page .lead-card {
@@ -156,7 +160,7 @@ p {
   width: 100%;
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius-card);
-  background: var(--surface);
+  background: #EAEAEA;
   padding: 2rem 1.1rem;
   cursor: pointer;
   text-align: center;
@@ -958,6 +962,19 @@ p {
 
 .hidden {
   display: none;
+}
+
+.instagram-link {
+  margin-top: 1.1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-family: var(--font-sans);
+}
+
+.instagram-link a {
+  color: var(--muted);
+  text-decoration: underline;
 }
 
 @keyframes pulse {
