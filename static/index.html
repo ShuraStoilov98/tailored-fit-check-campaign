@@ -67,7 +67,7 @@
 
       <section class="download-card">
         <h2 class="download-heading">DOWNLOAD TAILORED</h2>
-        <p class="download-subcopy">Want daily fit checks and more styling advice? Get the app.</p>
+        <p class="download-subcopy">Want daily fit checks, shopping & styling advice and more? Get the app.</p>
         <div class="badge-row">
           <a
             class="app-store-btn"
@@ -89,11 +89,36 @@
             rel="noopener noreferrer"
           >
             <img
-              src="/static/assets/get-it-on-google-play-badge-logo-png_seeklogo-290335.png"
+              src="/static/assets/GetItOnGooglePlay_Badge_Web_color_English.svg"
               alt="Get it on Google Play"
               class="app-store-badge"
             />
           </a>
+        </div>
+      </section>
+
+      <section class="lead-card">
+        <h2 id="lead-heading" class="lead-heading">Join the early community</h2>
+        <p id="lead-subcopy" class="lead-subcopy">Get updates on new Tailored releases and join our early adopter community.</p>
+        <p id="lead-msg" class="lead-message hidden" role="alert"></p>
+        <form id="lead-form" novalidate>
+          <input
+            id="lead-email"
+            type="email"
+            class="lead-input"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+          <label class="lead-consent" for="lead-consent-checkbox">
+            <input id="lead-consent-checkbox" type="checkbox" class="lead-checkbox" />
+            <span class="lead-consent-text">I agree to receive Tailored updates, launch news, and styling tips by email.</span>
+          </label>
+          <button id="lead-submit" type="submit" class="lead-submit-btn">Join the community</button>
+        </form>
+        <div id="lead-success" class="lead-success hidden">
+          <p class="lead-success-heading">Thanks for joining.</p>
+          <p class="lead-success-sub">You're on the early Tailored list.</p>
+          <p class="lead-success-note">We'll send you styling notes, launch updates, and early access.</p>
         </div>
       </section>
 

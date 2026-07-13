@@ -13,6 +13,12 @@ const logoFallback = document.getElementById("logo-fallback");
 const pickerOverlay = document.getElementById("photo-picker-overlay");
 const pickerCameraBtn = document.getElementById("picker-camera");
 const pickerGalleryBtn = document.getElementById("picker-gallery");
+const leadForm = document.getElementById("lead-form");
+const leadEmailInput = document.getElementById("lead-email");
+const leadConsentCheckbox = document.getElementById("lead-consent-checkbox");
+const leadSubmitBtn = document.getElementById("lead-submit");
+const leadMsg = document.getElementById("lead-msg");
+const leadSuccess = document.getElementById("lead-success");
 const modalState = createModal();
 
 let selectedFile = null;
@@ -275,6 +281,67 @@ function renderPreview(previewUrl) {
   uploadPreview.src = previewUrl;
   uploadCard.classList.add("has-preview");
 }
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+function showLeadMsg(text, type) {
+  leadMsg.textContent = text;
+  leadMsg.className = `lead-message ${type}`;
+}
+
+function clearLeadMsg() {
+  leadMsg.textContent = "";
+  leadMsg.className = "lead-message hidden";
+}
+
+leadForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  clearLeadMsg();
+
+  const email = leadEmailInput.value.trim();
+  if (!isValidEmail(email)) {
+    showLeadMsg("Please enter a valid email.", "error");
+    return;
+  }
+  if (!leadConsentCheckbox.checked) {
+    showLeadMsg("Please confirm you're happy to receive Tailored updates.", "error");
+    return;
+  }
+
+  leadSubmitBtn.disabled = true;
+  leadSubmitBtn.textContent = "Joining...";
+
+  try {
+    const response = await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        marketing_consent: true,
+        campaign_id: campaignContext.campaign_id,
+        source: campaignContext.source,
+        slug: campaignContext.short_link_slug,
+        occasion: occasionInput.value.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || "We couldn't save your email just now. Please try again.");
+    }
+
+    leadForm.classList.add("hidden");
+    leadMsg.classList.add("hidden");
+    leadSuccess.classList.remove("hidden");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "We couldn't save your email just now. Please try again.";
+    showLeadMsg(message, "error");
+    leadSubmitBtn.disabled = false;
+    leadSubmitBtn.textContent = "Join the community";
+  }
+});
 
 function bindLogoFallback() {
   if (!brandLogo) {
