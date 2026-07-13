@@ -87,13 +87,19 @@
               class="app-store-badge"
             />
           </a>
-          <button id="google-play-btn" type="button" class="app-store-btn">
+          <a
+            id="google-play-btn"
+            class="app-store-btn"
+            href="https://play.google.com/store/apps/details?id=com.mycompany.tailorednew&utm_source=fitcheck&utm_campaign=fitcheck-london-july"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <img
-              src="/static/assets/PreRegisterOnGooglePlay_Badge_Web_color_english.png.png"
-              alt="Pre-register on Google Play"
+              src="/static/assets/get-it-on-google-play-badge-logo-png_seeklogo-290335.png"
+              alt="Get it on Google Play"
               class="app-store-badge"
             />
-          </button>
+          </a>
         </div>
       </section>
 
@@ -123,49 +129,6 @@
       </section>
     </main>
 
-    <div id="android-overlay" class="android-overlay hidden" role="dialog" aria-modal="true" aria-label="Android waitlist">
-      <div class="android-overlay-inner">
-        <button id="android-back" class="android-back-btn" aria-label="Go back">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-          Back
-        </button>
-
-        <div class="android-hero">
-          <img
-            src="/static/assets/PreRegisterOnGooglePlay_Badge_Web_color_english.png.png"
-            alt="Pre-register on Google Play"
-            class="android-hero-badge"
-          />
-        </div>
-
-        <h1 class="android-heading">Android User?</h1>
-        <p class="android-subcopy">Tailored is coming soon on Google Play.<br>Register below and be the first to know.</p>
-
-        <div class="android-form-card">
-          <p id="android-lead-msg" class="lead-message hidden" role="alert"></p>
-          <form id="android-lead-form" novalidate>
-            <input
-              id="android-email"
-              type="email"
-              class="lead-input"
-              placeholder="you@example.com"
-              autocomplete="email"
-            />
-            <label class="lead-consent" for="android-consent-checkbox">
-              <input id="android-consent-checkbox" type="checkbox" class="lead-checkbox" />
-              <span class="lead-consent-text">I agree to receive updates when the Tailored Android app launches.</span>
-            </label>
-            <button id="android-submit" type="submit" class="lead-submit-btn">Notify me when Android app is live</button>
-          </form>
-          <div id="android-success" class="lead-success hidden">
-            <p class="lead-success-heading">You're on the list.</p>
-            <p class="lead-success-sub">We'll let you know the moment Tailored lands on Android.</p>
-            <p class="lead-success-note">Thanks for helping us prioritise the Android launch.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script src="/static/result.js?v=3"></script>
+    <script src="/static/result.js?v=4"></script>
   </body>
 </html>

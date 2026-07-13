@@ -20,14 +20,6 @@ const whatWorksBlock = document.getElementById("what-works");
 const improvementsBlock = document.getElementById("improvements");
 const appCta = document.getElementById("app-cta");
 const googlePlayBtn = document.getElementById("google-play-btn");
-const androidOverlay = document.getElementById("android-overlay");
-const androidBackBtn = document.getElementById("android-back");
-const androidLeadForm = document.getElementById("android-lead-form");
-const androidEmailInput = document.getElementById("android-email");
-const androidConsentCheckbox = document.getElementById("android-consent-checkbox");
-const androidSubmitBtn = document.getElementById("android-submit");
-const androidLeadMsg = document.getElementById("android-lead-msg");
-const androidSuccess = document.getElementById("android-success");
 const leadHeading = document.getElementById("lead-heading");
 const leadSubcopy = document.getElementById("lead-subcopy");
 const leadForm = document.getElementById("lead-form");
@@ -54,17 +46,7 @@ function logEvent(eventType) {
 
 appCta.addEventListener("click", () => logEvent("app_cta_clicked"));
 
-googlePlayBtn.addEventListener("click", () => {
-  logEvent("google_play_cta_clicked");
-  if (!androidOverlay) return;
-  androidOverlay.classList.remove("hidden");
-  androidOverlay.scrollTop = 0;
-  if (androidBackBtn) androidBackBtn.focus();
-});
-
-androidBackBtn.addEventListener("click", () => {
-  androidOverlay.classList.add("hidden");
-});
+googlePlayBtn.addEventListener("click", () => logEvent("google_play_cta_clicked"));
 
 bindLogoFallback();
 
@@ -212,61 +194,6 @@ function redirectHome() {
   if (campaignContext.short_link_slug) homeUrl.searchParams.set("slug", campaignContext.short_link_slug);
   window.location.replace(homeUrl.toString());
 }
-
-androidLeadForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  androidLeadMsg.textContent = "";
-  androidLeadMsg.className = "lead-message hidden";
-
-  const email = androidEmailInput.value.trim();
-  if (!isValidEmail(email)) {
-    androidLeadMsg.textContent = "Please enter a valid email.";
-    androidLeadMsg.className = "lead-message error";
-    return;
-  }
-  if (!androidConsentCheckbox.checked) {
-    androidLeadMsg.textContent = "Please confirm you're happy to receive Tailored updates.";
-    androidLeadMsg.className = "lead-message error";
-    return;
-  }
-
-  androidSubmitBtn.disabled = true;
-  androidSubmitBtn.textContent = "Registering...";
-
-  const ctx = _parsed?.campaign_context || campaignContext;
-
-  try {
-    const response = await fetch("/api/lead", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        marketing_consent: true,
-        campaign_id: ctx.campaign_id || "",
-        source: "android_waitlist",
-        slug: ctx.short_link_slug || "",
-        occasion: _parsed?.selected_occasion || "",
-        verdict_label: _parsed?.result?.verdict_label || "",
-        overall_score: _parsed?.result?.overall_score ?? null,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.error || "We couldn't save your email just now. Please try again.");
-    }
-
-    androidLeadForm.classList.add("hidden");
-    androidSuccess.classList.remove("hidden");
-    logEvent("android_waitlist_submitted");
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "We couldn't save your email just now. Please try again.";
-    androidLeadMsg.textContent = message;
-    androidLeadMsg.className = "lead-message error";
-    androidSubmitBtn.disabled = false;
-    androidSubmitBtn.textContent = "Notify me when Android app is live";
-  }
-});
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);

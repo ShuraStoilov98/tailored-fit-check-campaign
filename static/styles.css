@@ -517,9 +517,6 @@ p {
 .result-section-title,
 .result-bullet,
 .download-subcopy,
-.android-back-btn,
-.android-heading,
-.android-subcopy,
 .lead-subcopy,
 .lead-message,
 .lead-input,
@@ -763,73 +760,6 @@ p {
   display: block;
   height: 48px;
   width: auto;
-}
-
-/* Android waitlist overlay */
-.android-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--page-bg);
-  z-index: 40;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.android-overlay.hidden {
-  display: none;
-}
-
-.android-overlay-inner {
-  max-width: 430px;
-  margin: 0 auto;
-  padding: 1rem 1.25rem 3rem;
-}
-
-.android-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  background: none;
-  border: none;
-  padding: 0.5rem 0;
-  font-size: 0.92rem;
-  font-weight: 500;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.android-hero {
-  margin-top: 2rem;
-  text-align: center;
-}
-
-.android-hero-badge {
-  height: 60px;
-  width: auto;
-}
-
-.android-heading {
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  margin-top: 1.5rem;
-}
-
-.android-subcopy {
-  margin-top: 0.6rem;
-  font-size: 0.95rem;
-  color: var(--muted);
-  line-height: 1.55;
-}
-
-.android-form-card {
-  margin-top: 2rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  padding: 1.35rem 1.1rem 1.25rem;
 }
 
 .lead-heading {
