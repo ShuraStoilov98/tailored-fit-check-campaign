@@ -9,6 +9,7 @@ const campaignContext = {
 
 const brandLogo = document.getElementById("brand-logo");
 const logoFallback = document.getElementById("logo-fallback");
+const brandLogoLink = document.getElementById("brand-logo-link");
 const resultImage = document.getElementById("result-image");
 const lookLabel = document.getElementById("look-label");
 const overallScoreEl = document.getElementById("overall-score");
@@ -47,6 +48,8 @@ function logEvent(eventType) {
 appCta.addEventListener("click", () => logEvent("app_cta_clicked"));
 
 googlePlayBtn.addEventListener("click", () => logEvent("google_play_cta_clicked"));
+
+if (brandLogoLink) brandLogoLink.addEventListener("click", () => logEvent("logo_clicked"));
 
 bindLogoFallback();
 

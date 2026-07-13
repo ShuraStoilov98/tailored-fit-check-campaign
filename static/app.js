@@ -10,6 +10,7 @@ const processingState = document.getElementById("processing-state");
 const chips = Array.from(document.querySelectorAll(".chip"));
 const brandLogo = document.getElementById("brand-logo");
 const logoFallback = document.getElementById("logo-fallback");
+const brandLogoLink = document.getElementById("brand-logo-link");
 const pickerOverlay = document.getElementById("photo-picker-overlay");
 const pickerCameraBtn = document.getElementById("picker-camera");
 const pickerGalleryBtn = document.getElementById("picker-gallery");
@@ -37,6 +38,7 @@ bindLogoFallback();
 bindOccasionChips();
 bindPhotoInputs();
 bindPhotoPicker();
+bindLogoLink();
 
 const params = new URLSearchParams(window.location.search);
 const campaignContext = {
@@ -342,6 +344,11 @@ leadForm.addEventListener("submit", async (e) => {
     leadSubmitBtn.textContent = "Join the community";
   }
 });
+
+function bindLogoLink() {
+  if (!brandLogoLink) return;
+  brandLogoLink.addEventListener("click", () => logEvent("logo_clicked"));
+}
 
 function bindLogoFallback() {
   if (!brandLogo) {

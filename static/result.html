@@ -4,20 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tailored | Your Fit Check</title>
+    <link rel="icon" type="image/svg+xml" href="/static/assets/tailored-logo.svg" />
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body class="result-page">
     <main class="app-shell">
       <header class="top-brand">
         <div class="brand-header" aria-label="Tailored">
-          <div class="logo-wrap">
+          <a id="brand-logo-link" class="logo-wrap" aria-label="Tailored" href="https://www.tailored-to-you.com/">
             <img
               id="brand-logo"
               src="/static/assets/tailored-logo.svg"
               alt="Tailored"
             />
             <span id="logo-fallback" class="logo-fallback hidden">T</span>
-          </div>
+          </a>
           <span class="brand-wordmark">TAILORED</span>
         </div>
       </header>
@@ -129,6 +130,6 @@
       </section>
     </main>
 
-    <script src="/static/result.js?v=4"></script>
+    <script src="/static/result.js?v=5"></script>
   </body>
 </html>
