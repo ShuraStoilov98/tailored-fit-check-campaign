@@ -3,6 +3,7 @@
 [![CI](https://github.com/ShuraStoilov98/tailored-fit-check-campaign/actions/workflows/ci.yml/badge.svg)](https://github.com/ShuraStoilov98/tailored-fit-check-campaign/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
+[![Live demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://fitcheck.tailored-to-you.com/?campaign=github_readme&source=readme)
 
 A lightweight, no-login web app for Tailored's **Daily Fit Check** growth experiments.
 
@@ -12,13 +13,17 @@ This is deliberately **separate** from the main Tailored app: no Firebase Auth, 
 
 ---
 
+## Try it
+
+**[fitcheck.tailored-to-you.com](https://fitcheck.tailored-to-you.com/?campaign=github_readme&source=readme)** — best on a phone. Take a photo of what you're wearing and you'll get a verdict in a few seconds.
+
 ## Screens
 
 | Landing | Result |
 |---|---|
-| <img src="docs/images/landing.png" alt="Mobile landing page with photo upload, occasion chips, and Get My Fit Check CTA" width="320"> | <img src="docs/images/result.png" alt="Result page with overall score, fit/style/colour sub-scores, what works, improvements, and app CTA" width="320"> |
+| <img src="docs/images/landing.png" alt="Mobile landing page with a selected street-style outfit photo, occasion chips, and Get My Fit Check CTA" width="320"> | <img src="docs/images/result.png" alt="Result page with the example outfit, styling scores, constructive tips, and app CTA" width="320"> |
 
-*The outfit photo in the result screenshot is a neutral placeholder — real uploads are never stored.*
+Screenshots use an openly licensed example photo and the local mock verdict; the feedback is illustrative, not a live AI assessment of the person shown. Photo: [TellusFashion](https://www.tellusfashion.com/), [Street Style at London Fashion Week 04](https://commons.wikimedia.org/wiki/File:Street_Style_at_London_Fashion_Week_04.jpg), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/), via Wikimedia Commons ([original Flickr source](https://www.flickr.com/photos/75075293@N02/6755037861/)). The [bundled original](docs/images/outfit-example.jpg) is unchanged; the app resizes and crops its display in the screenshots. No endorsement is implied.
 
 ---
 
@@ -75,7 +80,7 @@ flowchart LR
     style GS fill:#D0B98C,stroke:#8a7a52,color:#1a1a1a
 ```
 
-**Why this shape:** the photo is held in memory, resized, re-encoded to JPEG, sent to OpenAI, and dropped. It never touches disk and never reaches a database. Analytics calls are fire-and-forget so a slow webhook can never delay a user's verdict.
+**Why this shape:** the backend resizes and re-encodes the photo to JPEG, sends it to OpenAI, and does not intentionally persist it in app storage or a database. FastAPI's multipart handling can spool uploads to temporary disk files. The browser keeps a preview in tab-scoped `sessionStorage` so the result page can display it. Event logging runs in the background; lead capture waits for the webhook so a failed save can be reported.
 
 ---
 
@@ -202,17 +207,23 @@ See [`.env.example`](.env.example).
 
 ## Security & privacy
 
-This repo is public, so the guarantees are worth stating plainly:
+The app is designed to keep campaign data separate from the main Tailored app:
 
 * **The OpenAI key never leaves the backend.** `/api/public-config` exposes only the CTA URL, and a test asserts that.
-* **Photos are never stored.** Held in memory, re-encoded, sent, discarded. Nothing is written to disk or logged.
-* **No raw image data in logs.** Event rows carry campaign metadata only.
+* **No persistent server photo storage.** Multipart handling may use temporary files, and a preview is held in browser `sessionStorage` for the result page. Photos are sent to OpenAI for analysis; provider retention is separate from this app's storage behavior.
+* **Event payloads omit images.** They contain campaign metadata and verdict scores. Keep personal data out of campaign parameters and free-text event fields.
 * **Email only with consent.** `/api/lead` rejects submissions without `marketing_consent`.
-* **Uploads are validated and re-encoded** — content type and extension are checked, then the image is decoded and re-written as JPEG, which strips EXIF (including GPS) as a side effect.
-* **Rate limited** per client on the two endpoints that cost money or write data.
-* **Errors never leak internals.** All handlers return friendly messages; no stack traces reach the client.
+* **Uploads are decoded and re-encoded.** The content type is checked, with extension fallback for generic uploads, then Pillow decodes and rewrites the image as JPEG. Original EXIF metadata is not copied to the output.
+* **Basic process-local throttling** covers Fit Checks and leads; see the limitations below before exposing the service broadly.
+* **Client errors use friendly messages.** Server logs still need appropriate access controls and retention.
 * **Secrets are kept out of the image.** `.dockerignore` excludes `.env` and `.venv`, and the container runs as a non-root user.
-* **CI guards it.** Every push fails the build if a `.env` is tracked or a credential pattern appears in a tracked file.
+* **CI runs lightweight secret checks.** Pushes to `main` and pull requests check for a tracked root `.env` and several credential patterns in the current tracked files. This does not scan Git history or detect every secret format.
+
+### Known limitations before broad promotion
+
+* `MAX_UPLOAD_MB` currently limits the normalized output, not the incoming request body. Enforce a request-size limit before multipart parsing to bound memory and temporary-disk use.
+* The throttle trusts the first `X-Forwarded-For` value. Configure a trusted proxy boundary before relying on it for spend protection. The limiter's stale-key cleanup also needs correction, and `/api/event` has no throttle or event-name allowlist.
+* The capture and result pages need a clear privacy notice explaining image processing, browser previews, analytics, and email collection before a wider campaign launch.
 
 ## Product guardrails
 
@@ -257,4 +268,4 @@ Funnel: QR scan → photo upload → fit check completed → app CTA click / ema
 
 ## License
 
-[MIT](LICENSE)
+Code is licensed under [MIT](LICENSE). The example outfit photo, including its appearance in the screenshots, remains under [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) with the attribution above. The code license does not grant rights to Tailored, Apple, or Google trademarks.

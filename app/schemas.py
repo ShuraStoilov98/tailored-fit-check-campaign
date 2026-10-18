@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, EmailStr, Field, model_validator
 
@@ -44,12 +44,19 @@ class FitCheckModelOutput(BaseModel):
 
 
 class EventLogRequest(BaseModel):
-    event_type: str = Field(max_length=80)
+    # Completion and email events are emitted by the server after success.
+    event_type: Literal[
+        "page_view", "photo_selected", "app_cta_clicked",
+        "google_play_cta_clicked", "logo_clicked", "error",
+    ]
     campaign_id: str = Field(default="", max_length=120)
     source: str = Field(default="", max_length=80)
     slug: str = Field(default="", max_length=120)
     occasion: str = Field(default="", max_length=80)
-    error_message: str = Field(default="", max_length=120)
+    error_message: Literal[
+        "", "NO_OUTFIT_DETECTED", "IMAGE_TOO_LARGE", "UNSUPPORTED_IMAGE_FORMAT",
+        "IMAGE_NORMALIZATION_FAILED", "RATE_LIMITED", "FIT_CHECK_FAILED",
+    ] = ""
 
 
 class LeadRequest(BaseModel):
@@ -60,7 +67,7 @@ class LeadRequest(BaseModel):
     slug: str = Field(default="", max_length=120)
     occasion: str = Field(default="", max_length=80)
     verdict_label: str = Field(default="", max_length=120)
-    overall_score: int | None = None
+    overall_score: ScoreInt | None = None
 
 
 class ErrorResponse(BaseModel):

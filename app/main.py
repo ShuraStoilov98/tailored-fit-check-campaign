@@ -4,6 +4,7 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from pydantic import ValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import APP_VERSION
@@ -15,7 +16,8 @@ from app.image_processing import (
     UnsupportedImageFormatError,
     normalize_uploaded_image_bytes,
 )
-from app.rate_limit import RateLimiter, client_key
+from app.rate_limit import RateLimiter
+from app.security import RequestProtectionMiddleware
 from app.schemas import (
     ErrorResponse,
     EventLogRequest,
@@ -47,17 +49,30 @@ _lead_limiter = RateLimiter(
     max_requests=settings.lead_rate_limit,
     window_seconds=settings.rate_limit_window_seconds,
 )
-
-
-def _enforce_rate_limit(limiter: RateLimiter, request: Request) -> None:
-    if not limiter.allow(client_key(request)):
-        raise HTTPException(
-            status_code=429,
-            detail={
-                "error_code": RATE_LIMITED_ERROR_CODE,
-                "error": "That's a lot of Fit Checks at once. Please wait a moment and try again.",
-            },
-        )
+_event_limiter = RateLimiter(
+    max_requests=settings.event_rate_limit,
+    window_seconds=settings.rate_limit_window_seconds,
+)
+_api_global_limiter = RateLimiter(
+    max_requests=settings.api_global_rate_limit,
+    window_seconds=settings.rate_limit_window_seconds,
+)
+_fit_check_global_limiter = RateLimiter(
+    max_requests=settings.fit_check_global_rate_limit,
+    window_seconds=settings.rate_limit_window_seconds,
+)
+app.add_middleware(
+    RequestProtectionMiddleware,
+    max_upload_bytes=settings.max_upload_mb * 1024 * 1024,
+    limiters={
+        "/api/fit-check": _fit_check_limiter,
+        "/api/lead": _lead_limiter,
+        "/api/event": _event_limiter,
+    },
+    api_limiter=_api_global_limiter,
+    fit_check_limiter=_fit_check_global_limiter,
+    trust_railway_proxy=settings.trust_railway_proxy,
+)
 
 
 def _build_error_response(detail: str | dict) -> ErrorResponse:
@@ -123,21 +138,21 @@ async def public_config() -> PublicConfigResponse:
 
 @app.post("/api/fit-check", response_model=FitCheckResponse)
 async def fit_check(
-    request: Request,
     image: UploadFile = File(...),
     occasion: str | None = Form(default=None),
     campaign_id: str | None = Form(default=None),
     source: str | None = Form(default=None),
     slug: str | None = Form(default=None),
 ) -> FitCheckResponse:
-    _enforce_rate_limit(_fit_check_limiter, request)
-
-    FitCheckRequestMeta(
-        occasion=occasion,
-        campaign_id=campaign_id,
-        source=source,
-        short_link_slug=slug,
-    )
+    try:
+        FitCheckRequestMeta(
+            occasion=occasion,
+            campaign_id=campaign_id,
+            source=source,
+            short_link_slug=slug,
+        )
+    except ValidationError:
+        raise HTTPException(status_code=422, detail="Please check your input and try again.")
 
     if image.content_type and image.content_type not in settings.allowed_image_types:
         raise HTTPException(
@@ -148,7 +163,13 @@ async def fit_check(
             },
         )
 
-    image_bytes = await image.read()
+    max_upload_bytes = settings.max_upload_mb * 1024 * 1024
+    image_bytes = await image.read(max_upload_bytes + 1)
+    if len(image_bytes) > max_upload_bytes:
+        raise HTTPException(
+            status_code=413,
+            detail={"error_code": IMAGE_TOO_LARGE_ERROR_CODE, "error": "This photo is too large. Please choose a smaller image."},
+        )
     try:
         image_bytes, image_content_type = normalize_uploaded_image_bytes(
             image_bytes,
@@ -166,7 +187,7 @@ async def fit_check(
         )
     except ImageTooLargeError:
         raise HTTPException(
-            status_code=400,
+            status_code=413,
             detail={
                 "error_code": IMAGE_TOO_LARGE_ERROR_CODE,
                 "error": "This photo is too large. Please try a screenshot or a smaller image.",
@@ -194,7 +215,7 @@ async def fit_check(
                 status_code=422,
                 detail={
                     "error_code": NO_OUTFIT_ERROR_CODE,
-                    "error": model_output.no_outfit_message or NO_OUTFIT_ERROR_MESSAGE,
+                    "error": NO_OUTFIT_ERROR_MESSAGE,
                 },
             )
     except HTTPException as exc:
@@ -226,9 +247,7 @@ async def fit_check(
 
 
 @app.post("/api/lead")
-async def capture_lead(request: Request, payload: LeadRequest) -> JSONResponse:
-    _enforce_rate_limit(_lead_limiter, request)
-
+async def capture_lead(payload: LeadRequest) -> JSONResponse:
     if not payload.marketing_consent:
         raise HTTPException(status_code=400, detail="Marketing consent is required.")
 
