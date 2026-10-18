@@ -39,7 +39,6 @@ NO_OUTFIT_ERROR_CODE = "NO_OUTFIT_DETECTED"
 NO_OUTFIT_ERROR_MESSAGE = "No outfit detected. Please try again with a clear outfit photo."
 IMAGE_TOO_LARGE_ERROR_CODE = "IMAGE_TOO_LARGE"
 UNSUPPORTED_IMAGE_FORMAT_ERROR_CODE = "UNSUPPORTED_IMAGE_FORMAT"
-RATE_LIMITED_ERROR_CODE = "RATE_LIMITED"
 
 _fit_check_limiter = RateLimiter(
     max_requests=settings.fit_check_rate_limit,

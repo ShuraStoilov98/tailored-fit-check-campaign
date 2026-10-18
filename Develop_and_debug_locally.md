@@ -15,7 +15,7 @@ returns a canned Fit Check so you can work on the frontend without spending cred
 ## Run
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --no-proxy-headers --no-access-log
 ```
 
 App is at `http://localhost:8000`.
@@ -47,17 +47,24 @@ webhook URL before the app is imported, so nothing hits the network.
 | `ENVIRONMENT` | No | Set to `local` for dev |
 | `FIT_CHECK_RATE_LIMIT` | No | Default: `8` per 60s per client |
 | `LEAD_RATE_LIMIT` | No | Default: `5` per 60s per client |
+| `EVENT_RATE_LIMIT` | No | Default: `60` per 60s per client |
+| `API_GLOBAL_RATE_LIMIT` | No | Default: `240` API POSTs per 60s per process |
+| `FIT_CHECK_GLOBAL_RATE_LIMIT` | No | Default: `40` Fit Checks per 60s per process |
+| `TRUST_RAILWAY_PROXY` | No | Leave `false` locally; Railway-only opt-in described in README |
 
 ## Logs & errors
 
-Uvicorn prints request logs and tracebacks to stdout. For API errors check the
+The documented command disables Uvicorn access logs to keep IPs and URL parameters
+out of them. Application warnings report error types without upstream response text.
+For API errors check the
 response JSON — the `error_code` field is the fast signal:
 
 | `error_code` | Meaning |
 |---|---|
 | `NO_OUTFIT_DETECTED` | Model saw no clear outfit |
 | `UNSUPPORTED_IMAGE_FORMAT` | Bad content type/extension, or undecodable bytes |
-| `IMAGE_TOO_LARGE` | Could not compress under `MAX_UPLOAD_MB` |
+| `IMAGE_TOO_LARGE` | File exceeds `MAX_UPLOAD_MB` or decoded image exceeds 20 megapixels |
+| `REQUEST_TOO_LARGE` | JSON request exceeds 16 KB |
 | `RATE_LIMITED` | Client exceeded the window budget |
 
 Hitting `RATE_LIMITED` while testing? Restart the server — the limiter is in-memory.
@@ -68,9 +75,12 @@ Hitting `RATE_LIMITED` while testing? Restart the server — the limiter is in-m
 curl localhost:8000/health
 curl -X POST localhost:8000/api/fit-check -F 'image=@path/to/photo.jpg'
 node --check static/app.js && node --check static/result.js
+python scripts/check_secrets.py
 ```
 
 ## Deploy
 
 Push to `main` — Railway builds from the `Dockerfile` and redeploys.
 Environment variables live in the Railway dashboard, never in the repo.
+Use one worker/replica for the in-memory rate limits. Set `ENVIRONMENT=production`;
+enable `TRUST_RAILWAY_PROXY=true` only for ingress-only Railway deployments.

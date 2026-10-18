@@ -66,3 +66,19 @@ def test_raises_when_image_cannot_be_compressed_under_limit():
         normalize_uploaded_image_bytes(
             _image_bytes(2000, 2000), "image/jpeg", "big.jpg", max_upload_mb=0
         )
+
+
+def test_decoded_pixel_limit_is_enforced_before_conversion(monkeypatch):
+    # Lower the budget to exercise the guard without allocating a giant image.
+    monkeypatch.setattr("app.image_processing.MAX_IMAGE_PIXELS", 10_000)
+    with pytest.raises(ImageTooLargeError):
+        normalize_uploaded_image_bytes(
+            _image_bytes(101, 100), "image/jpeg", "outfit.jpg", max_upload_mb=5,
+        )
+
+
+def test_disallowed_actual_format_cannot_hide_behind_jpeg_mime_type():
+    with pytest.raises(UnsupportedImageFormatError):
+        normalize_uploaded_image_bytes(
+            _image_bytes(100, 100, "GIF"), "image/jpeg", "outfit.jpg", max_upload_mb=5,
+        )

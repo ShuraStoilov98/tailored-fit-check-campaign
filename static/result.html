@@ -28,6 +28,13 @@
         <p id="look-label" class="look-label">Clean casual look</p>
       </section>
 
+      <details id="privacy-notice" class="privacy-notice">
+        <summary>Privacy &amp; your photo</summary>
+        <p>Your photo is sent to OpenAI for styling feedback. We do not keep a photo library or save photos in our database. Upload handling may use temporary files, and your browser keeps a preview in tab-scoped storage to show your result. OpenAI's data handling is separate from our app's storage.</p>
+        <p>We record campaign interactions and may send them to our Google Sheet. We briefly use your IP address in memory to limit abuse. If you submit your email with consent, we use it for Tailored updates and styling tips. Page fonts load from Google Fonts.</p>
+        <button id="clear-photo" class="clear-photo" type="button">Clear this preview and start again</button>
+      </details>
+
       <section class="result-card">
         <div class="score-row">
           <p class="score-label">Overall score</p>
@@ -118,7 +125,7 @@
           />
           <label class="lead-consent" for="lead-consent-checkbox">
             <input id="lead-consent-checkbox" type="checkbox" class="lead-checkbox" />
-            <span class="lead-consent-text">I agree to receive Tailored updates, launch news, and styling tips by email.</span>
+            <span class="lead-consent-text">I agree to receive Tailored updates, launch news, and styling tips by email. <a href="#privacy-notice">How we use your data</a>.</span>
           </label>
           <button id="lead-submit" type="submit" class="lead-submit-btn">Join the community</button>
         </form>

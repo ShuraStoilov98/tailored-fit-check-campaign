@@ -21,9 +21,9 @@ This is deliberately **separate** from the main Tailored app: no Firebase Auth, 
 
 | Landing | Result |
 |---|---|
-| <img src="docs/images/landing.png" alt="Mobile landing page with a selected street-style outfit photo, occasion chips, and Get My Fit Check CTA" width="320"> | <img src="docs/images/result.png" alt="Result page with the example outfit, styling scores, constructive tips, and app CTA" width="320"> |
+| <img src="docs/images/landing.png" alt="Mobile landing page with a selected formal outfit photo, occasion chips, and Get My Fit Check CTA" width="320"> | <img src="docs/images/result.png" alt="Result page with the example outfit, styling scores, constructive tips, and app CTA" width="320"> |
 
-Screenshots use an openly licensed example photo and the local mock verdict; the feedback is illustrative, not a live AI assessment of the person shown. Photo: [TellusFashion](https://www.tellusfashion.com/), [Street Style at London Fashion Week 04](https://commons.wikimedia.org/wiki/File:Street_Style_at_London_Fashion_Week_04.jpg), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/), via Wikimedia Commons ([original Flickr source](https://www.flickr.com/photos/75075293@N02/6755037861/)). The [bundled original](docs/images/outfit-example.jpg) is unchanged; the app resizes and crops its display in the screenshots. No endorsement is implied.
+Screenshots use a [user-provided example photo](docs/images/outfit-example.png) and the local mock verdict. The feedback is illustrative, not a live AI assessment of the person shown. The original photo is unchanged; the app resizes and crops its display in the screenshots.
 
 ---
 
@@ -92,7 +92,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env    # add your OPENAI_API_KEY
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --no-proxy-headers --no-access-log
 ```
 
 Open <http://localhost:8000>.
@@ -154,8 +154,9 @@ Errors return a consistent shape, with a machine-readable code where one applies
 |---|---|---|
 | `NO_OUTFIT_DETECTED` | 422 | Photo has no clear outfit |
 | `UNSUPPORTED_IMAGE_FORMAT` | 400 | Not a jpg/png/webp/heic, or undecodable |
-| `IMAGE_TOO_LARGE` | 400 | Could not compress under the limit |
-| `RATE_LIMITED` | 429 | Too many requests from one client |
+| `IMAGE_TOO_LARGE` | 413 | Upload exceeds the byte or decoded-pixel limit |
+| `REQUEST_TOO_LARGE` | 413 | JSON request exceeds 16 KB |
+| `RATE_LIMITED` | 429 | Client or service request budget exceeded |
 
 ---
 
@@ -198,10 +199,14 @@ See [`.env.example`](.env.example).
 | `APP_STORE_CTA_URL` | No | Short.io link | Surfaced via `/api/public-config` |
 | `GOOGLE_SHEET_WEBHOOK_URL` | No | — | Blank → event logging no-ops |
 | `ENVIRONMENT` | No | `local` | `local` enables mock mode |
-| `MAX_UPLOAD_MB` | No | `5` | Compression target |
+| `MAX_UPLOAD_MB` | No | `5` | Maximum incoming file size and normalized output, 1–20 MB |
 | `FIT_CHECK_RATE_LIMIT` | No | `8` | Fit Checks per window per client |
 | `LEAD_RATE_LIMIT` | No | `5` | Lead submits per window per client |
+| `EVENT_RATE_LIMIT` | No | `60` | Browser events per window per client |
+| `API_GLOBAL_RATE_LIMIT` | No | `240` | All API POST requests per window per process |
+| `FIT_CHECK_GLOBAL_RATE_LIMIT` | No | `40` | Fit Check requests per window per process |
 | `RATE_LIMIT_WINDOW_SECONDS` | No | `60` | Rate limit window |
+| `TRUST_RAILWAY_PROXY` | No | `false` | Opt in to Railway ingress's validated `X-Real-IP` header; see deployment below |
 
 ---
 
@@ -210,20 +215,19 @@ See [`.env.example`](.env.example).
 The app is designed to keep campaign data separate from the main Tailored app:
 
 * **The OpenAI key never leaves the backend.** `/api/public-config` exposes only the CTA URL, and a test asserts that.
-* **No persistent server photo storage.** Multipart handling may use temporary files, and a preview is held in browser `sessionStorage` for the result page. Photos are sent to OpenAI for analysis; provider retention is separate from this app's storage behavior.
-* **Event payloads omit images.** They contain campaign metadata and verdict scores. Keep personal data out of campaign parameters and free-text event fields.
+* **No persistent server photo storage.** Multipart handling may use temporary files, and a preview is held in browser `sessionStorage` for the result page. The result page offers a way to clear it. Both pages explain data handling. Photos are sent to OpenAI for analysis; provider retention is separate from this app's storage behavior.
+* **Event payloads omit images.** They contain campaign metadata and verdict scores. Browser event names and error codes are allowlisted; success events are emitted by the server. Keep personal data out of campaign parameters.
 * **Email only with consent.** `/api/lead` rejects submissions without `marketing_consent`.
-* **Uploads are decoded and re-encoded.** The content type is checked, with extension fallback for generic uploads, then Pillow decodes and rewrites the image as JPEG. Original EXIF metadata is not copied to the output.
-* **Basic process-local throttling** covers Fit Checks and leads; see the limitations below before exposing the service broadly.
-* **Client errors use friendly messages.** Server logs still need appropriate access controls and retention.
+* **Requests are bounded before parsing.** File requests have a `MAX_UPLOAD_MB` budget plus 64 KB for multipart headers and fields; the file itself must fit `MAX_UPLOAD_MB`. Actual bytes are counted even without a reliable `Content-Length`. JSON is limited to 16 KB, and body reads time out after 30 seconds.
+* **Uploads are decoded and re-encoded.** MIME types and actual decoded formats are checked, with extension fallback for generic uploads. Images over 20 megapixels are rejected before RGB conversion. The JPEG rewrite does not copy original EXIF metadata.
+* **Basic process-local throttling** covers Fit Checks, leads, and events before parsing. Global caps also apply across clients. Stale client entries expire and the client table is bounded. Forwarded headers are ignored by default.
+* **Client errors use friendly messages.** AI calls have a 30-second total deadline and no automatic retries. Application warnings omit raw model responses and upstream exception text. The documented server command disables access logs so IP addresses and URL parameters aren't recorded by Uvicorn; hosting-provider logs need separate access and retention controls.
 * **Secrets are kept out of the image.** `.dockerignore` excludes `.env` and `.venv`, and the container runs as a non-root user.
-* **CI runs lightweight secret checks.** Pushes to `main` and pull requests check for a tracked root `.env` and several credential patterns in the current tracked files. This does not scan Git history or detect every secret format.
+* **CI runs lightweight secret checks.** Pushes to `main` and pull requests scan files and reachable Git history for environment files and common credential patterns, including Apps Script webhook URLs. Matches report locations, never secret values. Run `python scripts/check_secrets.py` locally. This is not an exhaustive secret detector.
 
-### Known limitations before broad promotion
+### Operational limits
 
-* `MAX_UPLOAD_MB` currently limits the normalized output, not the incoming request body. Enforce a request-size limit before multipart parsing to bound memory and temporary-disk use.
-* The throttle trusts the first `X-Forwarded-For` value. Configure a trusted proxy boundary before relying on it for spend protection. The limiter's stale-key cleanup also needs correction, and `/api/event` has no throttle or event-name allowlist.
-* The capture and result pages need a clear privacy notice explaining image processing, browser previews, analytics, and email collection before a wider campaign launch.
+The limiter is intended for one worker on one Railway replica. Restarting resets budgets; adding workers or replicas multiplies them. Global caps bound traffic per window, not lifetime spend, and determined abuse can exhaust the allowance for legitimate visitors. Set provider spending limits and review traffic when promoting a campaign. Background event delivery is best effort and capped at 64 pending tasks; email capture still waits for a successful webhook response.
 
 ## Product guardrails
 
@@ -238,10 +242,12 @@ Scores are shown as `4/5` style sub-scores on outfit dimensions, not as a single
 Railway builds from the [`Dockerfile`](Dockerfile) and binds the platform port:
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port $PORT
+uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers --no-access-log
 ```
 
 Push to `main` and Railway redeploys. Set the environment variables in the Railway dashboard — never in the repo.
+
+Set `ENVIRONMENT=production` and provide `OPENAI_API_KEY`. For a service reachable **only through Railway's public HTTP ingress**, set `TRUST_RAILWAY_PROXY=true` to use its [`X-Real-IP` client address](https://docs.railway.com/networking/public-networking/specs-and-limits). The app validates a single IP and ignores `X-Forwarded-For`. Keep Uvicorn's proxy rewriting disabled as in the command above. Leave this flag false on directly accessible servers or other hosting platforms; behind a proxy, the safe default shares the per-client allowance across that proxy's visitors. Global limits apply in both modes.
 
 ## Project layout
 
@@ -255,8 +261,10 @@ app/
   image_processing.py  Validate, resize, re-encode uploads
   event_logging.py     Fire-and-forget webhook logging
   rate_limit.py        In-memory per-client throttle
+  security.py          Request byte limits, deadlines, and API throttling before parsing
 static/                index.html · result.html · app.js · result.js · styles.css
 tests/                 Offline pytest suite
+scripts/               Local and CI credential-pattern checks
 docs/images/           README screenshots
 ```
 
@@ -268,4 +276,4 @@ Funnel: QR scan → photo upload → fit check completed → app CTA click / ema
 
 ## License
 
-Code is licensed under [MIT](LICENSE). The example outfit photo, including its appearance in the screenshots, remains under [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) with the attribution above. The code license does not grant rights to Tailored, Apple, or Google trademarks.
+Code is licensed under [MIT](LICENSE). The user-provided example photo, including its appearance in the screenshots, is excluded from the MIT code license. The code license does not grant rights to Tailored, Apple, or Google trademarks.

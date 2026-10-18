@@ -19,6 +19,7 @@ SUPPORTED_IMAGE_EXTENSIONS = {
     ".heic": "image/heic",
     ".heif": "image/heif",
 }
+MAX_IMAGE_PIXELS = 20_000_000
 
 
 class UnsupportedImageFormatError(Exception):
@@ -73,7 +74,9 @@ def normalize_uploaded_image_bytes(
     _register_heif_support()
 
     try:
-        with Image.open(BytesIO(image_bytes)) as image:
+        with Image.open(BytesIO(image_bytes), formats=("JPEG", "PNG", "WEBP", "HEIF")) as image:
+            if image.width * image.height > MAX_IMAGE_PIXELS:
+                raise ImageTooLargeError
             image = image.convert("RGB")
             for max_dimension in (1600, 1280):
                 target_width, target_height = _resize_dimensions(image.width, image.height, max_dimension)
@@ -88,6 +91,8 @@ def normalize_uploaded_image_bytes(
                             return normalized_bytes, "image/jpeg"
                 finally:
                     resized.close()
+    except Image.DecompressionBombError as exc:
+        raise ImageTooLargeError from exc
     except (UnidentifiedImageError, OSError, ValueError) as exc:
         raise UnsupportedImageFormatError from exc
 

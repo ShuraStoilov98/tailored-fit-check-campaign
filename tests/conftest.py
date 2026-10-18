@@ -14,6 +14,11 @@ os.environ["ENVIRONMENT"] = "local"
 os.environ["FIT_CHECK_RATE_LIMIT"] = "5"
 os.environ["LEAD_RATE_LIMIT"] = "5"
 os.environ["RATE_LIMIT_WINDOW_SECONDS"] = "60"
+os.environ["EVENT_RATE_LIMIT"] = "10"
+os.environ["API_GLOBAL_RATE_LIMIT"] = "240"
+os.environ["FIT_CHECK_GLOBAL_RATE_LIMIT"] = "40"
+os.environ["TRUST_RAILWAY_PROXY"] = "false"
+os.environ["MAX_UPLOAD_MB"] = "5"
 
 from io import BytesIO  # noqa: E402
 
@@ -34,6 +39,9 @@ def reset_rate_limiters():
     """Each test starts with a clean rate-limit budget."""
     main._fit_check_limiter._hits.clear()
     main._lead_limiter._hits.clear()
+    main._event_limiter._hits.clear()
+    main._api_global_limiter._hits.clear()
+    main._fit_check_global_limiter._hits.clear()
     yield
 
 

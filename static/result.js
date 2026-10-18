@@ -1,5 +1,10 @@
 const STORAGE_KEY = "fitCheckResult";
 
+document.getElementById("clear-photo").addEventListener("click", () => {
+  sessionStorage.removeItem(STORAGE_KEY);
+  redirectHome();
+});
+
 const params = new URLSearchParams(window.location.search);
 const campaignContext = {
   campaign_id: params.get("campaign") || "",

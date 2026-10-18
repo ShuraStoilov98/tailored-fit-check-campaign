@@ -2,8 +2,11 @@ fastapi==0.136.3
 uvicorn[standard]==0.49.0
 python-multipart==0.0.32
 pydantic[email]==2.13.4
-pydantic-settings==2.14.1
+pydantic-settings==2.14.2
 openai==2.41.0
 httpx==0.28.1
-Pillow==12.2.0
+Pillow==12.3.0
 pillow-heif==1.3.0
+# Pin patched transitive dependencies for request parsing and outbound TLS.
+starlette==1.3.1
+anyio==4.14.2

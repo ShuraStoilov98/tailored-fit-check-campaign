@@ -1,10 +1,10 @@
+import asyncio
 import base64
 import json
 import logging
 
 import openai
 from fastapi import HTTPException
-from pydantic import ValidationError
 
 from app.config import get_settings
 from app.prompts import SYSTEM_PROMPT, build_user_message
@@ -35,7 +35,7 @@ _MOCK_RESPONSE = FitCheckResponse(
 def _get_client(api_key: str) -> openai.AsyncOpenAI:
     global _client
     if _client is None:
-        _client = openai.AsyncOpenAI(api_key=api_key, timeout=30.0)
+        _client = openai.AsyncOpenAI(api_key=api_key, timeout=30.0, max_retries=0)
     return _client
 
 
@@ -61,44 +61,46 @@ async def generate_fit_check(
     client = _get_client(settings.openai_api_key)
 
     try:
-        completion = await client.chat.completions.create(
-            model=settings.openai_model,
-            response_format={"type": "json_object"},
-            max_tokens=512,
-            temperature=0.4,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": data_url, "detail": "low"},
-                        },
-                        {"type": "text", "text": build_user_message(occasion)},
-                    ],
-                },
-            ],
-        )
-    except (openai.APIConnectionError, openai.APIStatusError, openai.OpenAIError) as exc:
-        logger.warning("OpenAI error: %s", exc)
+        async with asyncio.timeout(30.0):
+            completion = await client.chat.completions.create(
+                model=settings.openai_model,
+                response_format={"type": "json_object"},
+                max_tokens=512,
+                temperature=0.4,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": data_url, "detail": "low"},
+                            },
+                            {"type": "text", "text": build_user_message(occasion)},
+                        ],
+                    },
+                ],
+            )
+    except (openai.OpenAIError, TimeoutError) as exc:
+        logger.warning("OpenAI request failed (%s)", type(exc).__name__)
         raise HTTPException(
             status_code=502,
             detail="We couldn't complete your Fit Check right now. Please try again in a moment.",
         )
 
-    raw = completion.choices[0].message.content or ""
-
     try:
+        raw = completion.choices[0].message.content or ""
         data = json.loads(raw)
+        if not isinstance(data, dict):
+            raise ValueError("Expected a JSON object")
         fit_check = data.get("fit_check")
         if isinstance(fit_check, dict):
             for field in ("overall_score", "fit_score", "style_score", "colour_score"):
                 if isinstance(fit_check.get(field), (int, float)):
                     fit_check[field] = max(1, min(5, int(fit_check[field])))
         return FitCheckModelOutput(**data)
-    except (json.JSONDecodeError, ValidationError, TypeError, KeyError) as exc:
-        logger.warning("Response parse error: %s | raw: %.200s", exc, raw)
+    except (ValueError, TypeError, KeyError, IndexError, AttributeError, OverflowError) as exc:
+        logger.warning("Invalid Fit Check response (%s)", type(exc).__name__)
         raise HTTPException(
             status_code=502,
             detail="We couldn't complete your Fit Check right now. Please try again in a moment.",

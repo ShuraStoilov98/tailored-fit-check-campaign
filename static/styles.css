@@ -43,6 +43,32 @@ body.modal-open {
   overflow: hidden;
 }
 
+.privacy-notice {
+  margin: 1rem 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.privacy-notice summary {
+  cursor: pointer;
+}
+
+.privacy-notice p {
+  margin-top: 0.6rem;
+}
+
+.clear-photo {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 h1,
 h2,
 h3,

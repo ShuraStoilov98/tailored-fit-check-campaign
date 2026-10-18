@@ -10,10 +10,14 @@ logger = logging.getLogger(__name__)
 
 # Keeps fire-and-forget tasks alive until they complete so the GC can't discard them.
 _pending: set[asyncio.Task] = set()
+MAX_PENDING_EVENTS = 64
 
 
 def fire_and_forget(coro) -> None:
     """Schedule a coroutine as a background task without blocking the caller."""
+    if len(_pending) >= MAX_PENDING_EVENTS:
+        coro.close()
+        return
     task = asyncio.create_task(coro)
     _pending.add(task)
     task.add_done_callback(_pending.discard)
@@ -62,7 +66,7 @@ async def log_event(
         async with httpx.AsyncClient(timeout=8.0, follow_redirects=True) as client:
             await client.post(webhook_url, json=payload)
     except Exception as exc:
-        logger.warning("Event logging failed (%s): %s", event_type, exc)
+        logger.warning("Event logging failed (%s)", type(exc).__name__)
 
 
 async def log_lead(
@@ -102,5 +106,5 @@ async def log_lead(
             response = await client.post(webhook_url, json=payload)
             response.raise_for_status()
     except Exception as exc:
-        logger.warning("Lead logging failed: %s", exc)
+        logger.warning("Lead logging failed (%s)", type(exc).__name__)
         raise
