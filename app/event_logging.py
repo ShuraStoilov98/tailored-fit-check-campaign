@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 
 import httpx
 
+from app import APP_VERSION
+
 logger = logging.getLogger(__name__)
 
 # Keeps fire-and-forget tasks alive until they complete so the GC can't discard them.
@@ -53,7 +55,7 @@ async def log_event(
         "fit_score": fit_score,
         "style_score": style_score,
         "colour_score": colour_score,
-        "app_version": "2.0",
+        "app_version": APP_VERSION,
     }
 
     try:
@@ -92,7 +94,7 @@ async def log_lead(
         "environment": environment,
         "verdict_label": verdict_label,
         "overall_score": overall_score,
-        "app_version": "v0.2",
+        "app_version": APP_VERSION,
     }
 
     try:

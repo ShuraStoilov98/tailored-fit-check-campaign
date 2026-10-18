@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app import APP_VERSION
 from app.config import get_settings
 from app.event_logging import fire_and_forget, log_event, log_lead
 from app.fit_check import generate_fit_check
@@ -14,6 +15,7 @@ from app.image_processing import (
     UnsupportedImageFormatError,
     normalize_uploaded_image_bytes,
 )
+from app.rate_limit import RateLimiter, client_key
 from app.schemas import (
     ErrorResponse,
     EventLogRequest,
@@ -25,7 +27,7 @@ from app.schemas import (
 )
 
 settings = get_settings()
-app = FastAPI(title="Tailored Fit Check Campaign", version="2.0.0")
+app = FastAPI(title="Tailored Fit Check Campaign", version=APP_VERSION)
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
@@ -35,6 +37,27 @@ NO_OUTFIT_ERROR_CODE = "NO_OUTFIT_DETECTED"
 NO_OUTFIT_ERROR_MESSAGE = "No outfit detected. Please try again with a clear outfit photo."
 IMAGE_TOO_LARGE_ERROR_CODE = "IMAGE_TOO_LARGE"
 UNSUPPORTED_IMAGE_FORMAT_ERROR_CODE = "UNSUPPORTED_IMAGE_FORMAT"
+RATE_LIMITED_ERROR_CODE = "RATE_LIMITED"
+
+_fit_check_limiter = RateLimiter(
+    max_requests=settings.fit_check_rate_limit,
+    window_seconds=settings.rate_limit_window_seconds,
+)
+_lead_limiter = RateLimiter(
+    max_requests=settings.lead_rate_limit,
+    window_seconds=settings.rate_limit_window_seconds,
+)
+
+
+def _enforce_rate_limit(limiter: RateLimiter, request: Request) -> None:
+    if not limiter.allow(client_key(request)):
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error_code": RATE_LIMITED_ERROR_CODE,
+                "error": "That's a lot of Fit Checks at once. Please wait a moment and try again.",
+            },
+        )
 
 
 def _build_error_response(detail: str | dict) -> ErrorResponse:
@@ -64,7 +87,7 @@ async def http_exception_handler(_: Request, exc: StarletteHTTPException) -> JSO
 async def validation_exception_handler(_: Request, __: RequestValidationError) -> JSONResponse:
     return JSONResponse(
         status_code=422,
-        content=ErrorResponse(error="Please check your input and try again.").model_dump(),
+        content=ErrorResponse(error="Please check your input and try again.").model_dump(exclude_none=True),
     )
 
 
@@ -72,7 +95,9 @@ async def validation_exception_handler(_: Request, __: RequestValidationError) -
 async def generic_exception_handler(_: Request, __: Exception) -> JSONResponse:
     return JSONResponse(
         status_code=500,
-        content=ErrorResponse(error="Something went wrong while processing your request.").model_dump(),
+        content=ErrorResponse(
+            error="Something went wrong while processing your request."
+        ).model_dump(exclude_none=True),
     )
 
 
@@ -98,12 +123,15 @@ async def public_config() -> PublicConfigResponse:
 
 @app.post("/api/fit-check", response_model=FitCheckResponse)
 async def fit_check(
+    request: Request,
     image: UploadFile = File(...),
     occasion: str | None = Form(default=None),
     campaign_id: str | None = Form(default=None),
     source: str | None = Form(default=None),
     slug: str | None = Form(default=None),
 ) -> FitCheckResponse:
+    _enforce_rate_limit(_fit_check_limiter, request)
+
     FitCheckRequestMeta(
         occasion=occasion,
         campaign_id=campaign_id,
@@ -198,7 +226,9 @@ async def fit_check(
 
 
 @app.post("/api/lead")
-async def capture_lead(payload: LeadRequest) -> JSONResponse:
+async def capture_lead(request: Request, payload: LeadRequest) -> JSONResponse:
+    _enforce_rate_limit(_lead_limiter, request)
+
     if not payload.marketing_consent:
         raise HTTPException(status_code=400, detail="Marketing consent is required.")
 

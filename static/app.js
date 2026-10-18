@@ -30,6 +30,7 @@ const NO_OUTFIT_ERROR_CODE = "NO_OUTFIT_DETECTED";
 const IMAGE_TOO_LARGE_ERROR_CODE = "IMAGE_TOO_LARGE";
 const UNSUPPORTED_IMAGE_FORMAT_ERROR_CODE = "UNSUPPORTED_IMAGE_FORMAT";
 const IMAGE_NORMALIZATION_FAILED = "IMAGE_NORMALIZATION_FAILED";
+const RATE_LIMITED_ERROR_CODE = "RATE_LIMITED";
 const TARGET_UPLOAD_BYTES = 4 * 1024 * 1024;
 const MAX_BACKEND_BYTES = 5 * 1024 * 1024;
 const IS_LOCAL_DEV = ["localhost", "127.0.0.1"].includes(window.location.hostname);
@@ -174,6 +175,14 @@ function handleFitCheckError(payload) {
     showRetryModal(
       "Photo format not supported",
       "Please take a new photo or choose a JPEG/PNG image."
+    );
+    return;
+  }
+
+  if (errorCode === RATE_LIMITED_ERROR_CODE) {
+    showRetryModal(
+      "Just a moment",
+      "That's a lot of Fit Checks at once. Please wait a minute and try again."
     );
     return;
   }

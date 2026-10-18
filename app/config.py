@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     google_sheet_webhook_url: str = ""
+    rate_limit_window_seconds: int = 60
+    fit_check_rate_limit: int = 8
+    lead_rate_limit: int = 5
     allowed_image_types: tuple[str, ...] = (
         "image/jpeg",
         "image/png",

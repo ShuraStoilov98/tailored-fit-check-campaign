@@ -1,0 +1,32 @@
+# Secrets — never bake into an image layer
+.env
+.env.*
+!.env.example
+
+# Local virtualenvs (124MB+) and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# VCS and tooling
+.git/
+.gitignore
+.github/
+.claude/
+.agents/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Local scratch
+.local/
+tmp/
+uploads/
+tests/
+*.log
