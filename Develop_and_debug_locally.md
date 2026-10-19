@@ -29,7 +29,7 @@ http://localhost:8000/?campaign=fit_test_a&source=qr&slug=fit-test-a
 ## Test
 
 ```bash
-pytest -q
+python -m pytest -q
 ```
 
 The suite is offline by design — `tests/conftest.py` blanks `OPENAI_API_KEY` and the

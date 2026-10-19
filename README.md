@@ -103,7 +103,7 @@ Without an `OPENAI_API_KEY`, the app runs in **mock mode** locally and returns a
 
 ```bash
 pip install -r requirements-dev.txt
-pytest -q
+python -m pytest -q
 ```
 
 The suite is fully offline: no API key, no network, no spend.
