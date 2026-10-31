@@ -27,8 +27,6 @@ This is deliberately **separate** from the main Tailored app: no Firebase Auth, 
 |---|---|
 | <img src="docs/images/result.jpg" alt="Result page with the example outfit, verdict label, overall and per-category scores, and what works" width="240"> | <img src="docs/images/app-cta.jpg" alt="Download Tailored app store buttons, early community email signup with consent, and social links" width="240"> |
 
-Screenshots use a [user-provided example photo](docs/images/outfit-example.png) and the local mock verdict. The feedback is illustrative, not a live AI assessment of the person shown. The original photo is unchanged; the app resizes and crops its display in the screenshots.
-
 ---
 
 ## How it works
