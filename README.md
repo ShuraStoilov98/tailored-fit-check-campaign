@@ -19,9 +19,13 @@ This is deliberately **separate** from the main Tailored app: no Firebase Auth, 
 
 ## Screens
 
-| Landing | Result |
+| Landing | Photo selected | Checking |
+|---|---|---|
+| <img src="docs/images/landing.jpg" alt="Mobile landing page with empty photo upload area, occasion chips, and Get My Fit Check CTA" width="240"> | <img src="docs/images/photo-selected.jpg" alt="Landing page with an outfit photo selected and the Casual occasion chosen" width="240"> | <img src="docs/images/loading.jpg" alt="Loading overlay reading Checking your fit" width="240"> |
+
+| Result | App & community CTA |
 |---|---|
-| <img src="docs/images/landing.png" alt="Mobile landing page with a selected formal outfit photo, occasion chips, and Get My Fit Check CTA" width="320"> | <img src="docs/images/result.png" alt="Result page with the example outfit, styling scores, constructive tips, and app CTA" width="320"> |
+| <img src="docs/images/result.jpg" alt="Result page with the example outfit, verdict label, overall and per-category scores, and what works" width="240"> | <img src="docs/images/app-cta.jpg" alt="Download Tailored app store buttons, early community email signup with consent, and social links" width="240"> |
 
 Screenshots use a [user-provided example photo](docs/images/outfit-example.png) and the local mock verdict. The feedback is illustrative, not a live AI assessment of the person shown. The original photo is unchanged; the app resizes and crops its display in the screenshots.
 
